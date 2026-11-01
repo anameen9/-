@@ -1,0 +1,4034 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>محفظتي - إدارة أموالي</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   نظام الألوان - ثيم "شبحي" أحمر قاتم
+   ================================================================ */
+:root {
+    /* الوضع الفاتح - نفس الأحمر بدرجات هادئة */
+    --primary: #8B1A2B;
+    --primary-hover: #6E0F1F;
+    --primary-light: #f5e5e8;
+    --primary-glow: rgba(139, 26, 43, 0.18);
+    --accent: #B3243B;
+
+    --bg: #faf6f7;
+    --bg-card: #ffffff;
+    --bg-elevated: #ffffff;
+    --bg-soft: #f2eaec;
+    --bg-muted: #e8dde0;
+
+    --text: #1a0f13;
+    --text-secondary: #4a353a;
+    --text-muted: #8a7580;
+    --text-faint: #bfb0b6;
+    --text-on-primary: #ffffff;
+
+    --border: #ead9de;
+    --border-strong: #d4bfc5;
+
+    --income: #3F7D5E;
+    --income-bg: #e8f1eb;
+    --expense: #8B1A2B;
+    --expense-bg: #f5e5e8;
+    --savings: #7A6A9C;
+    --savings-bg: #eeebf3;
+    --warning: #b8862c;
+    --warning-bg: #f9f1e0;
+    --gold: #b88a3a;
+
+    --shadow-xs: 0 1px 2px rgba(26, 15, 19, 0.04);
+    --shadow-sm: 0 2px 8px rgba(26, 15, 19, 0.06);
+    --shadow-md: 0 4px 16px rgba(26, 15, 19, 0.08);
+    --shadow-lg: 0 8px 32px rgba(26, 15, 19, 0.1);
+    --shadow-glow: 0 4px 20px var(--primary-glow);
+
+    --radius-xl: 22px;
+    --radius-lg: 18px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+
+    --transition: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    --header-bg: rgba(250, 246, 247, 0.85);
+    --drawer-width: 280px;
+}
+
+/* الوضع الداكن - الثيم الشبحي الأساسي */
+body.dark {
+    --primary: #8B1A2B;
+    --primary-hover: #B3243B;
+    --primary-light: #2a0f15;
+    --primary-glow: rgba(179, 36, 59, 0.35);
+    --accent: #B3243B;
+
+    --bg: #0D0B10;
+    --bg-card: #1B1620;
+    --bg-elevated: #221b28;
+    --bg-soft: #221b28;
+    --bg-muted: #2a2230;
+
+    --text: #E8E3EC;
+    --text-secondary: #b8b0c2;
+    --text-muted: #8E8799;
+    --text-faint: #5a5265;
+    --text-on-primary: #ffffff;
+
+    --border: rgba(139, 26, 43, 0.22);
+    --border-strong: rgba(179, 36, 59, 0.35);
+
+    --income: #3F7D5E;
+    --income-bg: #16241c;
+    --expense: #B3243B;
+    --expense-bg: #2a0f15;
+    --savings: #7A6A9C;
+    --savings-bg: #201a2a;
+    --warning: #c9a04a;
+    --warning-bg: #2a2010;
+    --gold: #c9a04a;
+
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.55);
+    --shadow-glow: 0 4px 24px var(--primary-glow);
+
+    --header-bg: rgba(13, 11, 16, 0.88);
+}
+
+/* ================================================================
+   الأساسيات
+   ================================================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: 'Cairo', 'Tajawal', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background var(--transition), color var(--transition);
+    overflow-x: hidden;
+    line-height: 1.6;
+}
+
+/* تدرج خفي في الخلفية للوضع الداكن */
+body.dark::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(139, 26, 43, 0.12), transparent 50%),
+                radial-gradient(circle at 50% 100%, rgba(58, 42, 74, 0.15), transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+body > * { position: relative; z-index: 1; }
+
+/* أيقونات SVG */
+svg.ico {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    display: block;
+    flex-shrink: 0;
+    transition: color var(--transition);
+}
+svg.ico-sm { width: 16px; height: 16px; }
+svg.ico-lg { width: 24px; height: 24px; }
+svg.ico-xl { width: 28px; height: 28px; }
+
+/* ================================================================
+   الهيدر العلوي
+   ================================================================ */
+.top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--header-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    transition: background var(--transition), border-color var(--transition);
+}
+
+body.dark .top-bar {
+    background: linear-gradient(180deg, rgba(139, 26, 43, 0.15), rgba(13, 11, 16, 0.9));
+}
+
+.top-bar .logo {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: -0.3px;
+}
+
+.top-bar .logo svg { color: var(--accent); }
+
+.top-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.circle-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+    color: var(--text-secondary);
+}
+
+.circle-btn:hover {
+    background: var(--bg-soft);
+    color: var(--accent);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.circle-btn:active { transform: scale(0.92); }
+
+.menu-btn { display: flex; }
+
+/* ================================================================
+   القائمة الجانبية (Drawer)
+   ================================================================ */
+.drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(3px);
+    z-index: 150;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition), visibility var(--transition);
+}
+
+.drawer-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: var(--drawer-width);
+    max-width: 85vw;
+    background: var(--bg-card);
+    border-left: 1px solid var(--border);
+    z-index: 160;
+    transform: translateX(100%);
+    transition: transform var(--transition);
+    display: flex;
+    flex-direction: column;
+    box-shadow: -8px 0 32px rgba(0,0,0,0.3);
+}
+
+body.dark .drawer {
+    background: linear-gradient(180deg, #1B1620, #14101A);
+}
+
+.drawer.active { transform: translateX(0); }
+
+.drawer-header {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+body.dark .drawer-header {
+    background: linear-gradient(180deg, rgba(139, 26, 43, 0.18), transparent);
+}
+
+.drawer-greeting { flex: 1; }
+
+.drawer-greeting .dg-title {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.drawer-greeting .dg-name {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.3px;
+}
+
+.drawer-greeting .dg-name span { color: var(--accent); }
+
+.drawer-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+    flex-shrink: 0;
+}
+
+.drawer-close:hover {
+    background: var(--expense-bg);
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.drawer-nav {
+    flex: 1;
+    padding: 12px 12px 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.drawer-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+    text-align: right;
+    width: 100%;
+}
+
+.drawer-nav-item svg { color: var(--text-muted); transition: color var(--transition); }
+
+.drawer-nav-item:hover {
+    background: var(--bg-soft);
+    color: var(--text);
+}
+
+.drawer-nav-item:hover svg { color: var(--accent); }
+
+.drawer-nav-item.active {
+    background: var(--primary-light);
+    color: var(--accent);
+    box-shadow: inset 3px 0 0 var(--accent);
+}
+
+body.dark .drawer-nav-item.active {
+    background: rgba(139, 26, 43, 0.25);
+    color: #E8E3EC;
+    box-shadow: inset 3px 0 0 var(--accent), 0 0 12px rgba(179, 36, 59, 0.2);
+}
+
+.drawer-nav-item.active svg { color: var(--accent); }
+
+.drawer-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    font-size: 0.68rem;
+    color: var(--text-faint);
+    text-align: center;
+}
+
+/* ================================================================
+   الحاوية الرئيسية
+   ================================================================ */
+.main-wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 20px 40px;
+}
+
+/* ================================================================
+   شاشة الترحيب
+   ================================================================ */
+.welcome-screen {
+    padding: 28px 0 20px;
+    animation: fadeSlideDown 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.welcome-greeting {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 4px;
+    line-height: 1.35;
+    letter-spacing: -0.5px;
+}
+
+.welcome-greeting .name {
+    color: var(--accent);
+    position: relative;
+    text-shadow: 0 0 20px rgba(179, 36, 59, 0.3);
+}
+
+.welcome-sub {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-weight: 400;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.welcome-sub .dot { opacity: 0.4; }
+
+/* ================================================================
+   إجمالي الأموال
+   ================================================================ */
+.total-section {
+    text-align: center;
+    padding: 12px 0 24px;
+}
+
+.total-label {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.total-amount {
+    font-size: 2.4rem;
+    font-weight: 900;
+    color: var(--text);
+    direction: ltr;
+    letter-spacing: -1.5px;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    transition: color var(--transition);
+    text-shadow: 0 0 30px rgba(179, 36, 59, 0.15);
+}
+
+body.dark .total-amount {
+    text-shadow: 0 0 30px rgba(179, 36, 59, 0.3);
+}
+
+.total-amount .cur {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0;
+}
+
+/* ================================================================
+   أزرار الإضافة السريعة (بدل الزر العائم)
+   ================================================================ */
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+    animation: fadeSlideDown 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+}
+
+.quick-action-btn {
+    padding: 14px 10px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    transition: all var(--transition);
+}
+
+.quick-action-btn .qa-ico {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+}
+
+.quick-action-btn.income .qa-ico {
+    background: var(--income-bg);
+    color: var(--income);
+}
+
+.quick-action-btn.expense .qa-ico {
+    background: var(--expense-bg);
+    color: var(--expense);
+}
+
+.quick-action-btn.savings .qa-ico {
+    background: var(--savings-bg);
+    color: var(--savings);
+}
+
+.quick-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.quick-action-btn.income:hover { border-color: var(--income); }
+.quick-action-btn.expense:hover { border-color: var(--expense); }
+.quick-action-btn.savings:hover { border-color: var(--savings); }
+
+body.dark .quick-action-btn.income:hover { box-shadow: 0 4px 20px rgba(63, 125, 94, 0.3); }
+body.dark .quick-action-btn.expense:hover { box-shadow: 0 4px 20px rgba(179, 36, 59, 0.3); }
+body.dark .quick-action-btn.savings:hover { box-shadow: 0 4px 20px rgba(122, 106, 156, 0.3); }
+
+.quick-action-btn:active { transform: scale(0.97); }
+
+/* ================================================================
+   كروت المحافظ
+   ================================================================ */
+.wallets-scroll {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    padding: 4px 0 24px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.wallets-scroll::-webkit-scrollbar { display: none; }
+
+.wallet-card {
+    min-width: 260px;
+    max-width: 280px;
+    border-radius: var(--radius-xl);
+    padding: 22px;
+    scroll-snap-align: start;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    transition: transform var(--transition), box-shadow var(--transition);
+    flex-shrink: 0;
+}
+
+.wallet-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg), 0 0 24px rgba(179, 36, 59, 0.15);
+}
+
+.wallet-card:active { transform: scale(0.97); }
+
+.wallet-card::after {
+    content: '';
+    position: absolute;
+    top: -40%;
+    left: -20%;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    pointer-events: none;
+}
+
+.wallet-card .w-icon {
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: var(--radius-md);
+    background: rgba(255,255,255,0.22);
+    color: #fff;
+}
+
+.wallet-card .w-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.88);
+    margin-bottom: 6px;
+}
+
+.wallet-card .w-balance {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #fff;
+    direction: ltr;
+    text-align: right;
+    letter-spacing: -0.5px;
+}
+
+.wallet-card .w-balance .cur {
+    font-size: 0.78rem;
+    font-weight: 500;
+    opacity: 0.85;
+    margin-right: 4px;
+}
+
+.wallet-card.add-wallet {
+    background: var(--bg-card);
+    border: 2px dashed var(--border-strong);
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 168px;
+    color: var(--text-muted);
+    gap: 10px;
+}
+
+.wallet-card.add-wallet:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.wallet-card.add-wallet .plus-ico {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--bg-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    transition: all var(--transition);
+}
+
+.wallet-card.add-wallet:hover .plus-ico {
+    background: var(--primary-light);
+    color: var(--accent);
+}
+
+.wallet-card.add-wallet .label {
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+/* ================================================================
+   بطاقة المكافآت
+   ================================================================ */
+.rewards-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    padding: 22px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 18px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    transition: background var(--transition), border-color var(--transition);
+}
+
+body.dark .rewards-card {
+    background: linear-gradient(135deg, #1B1620, #221b28);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3), 0 0 20px rgba(179, 36, 59, 0.08);
+}
+
+.rewards-card::before {
+    content: '';
+    position: absolute;
+    top: -60%;
+    left: -20%;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(179, 36, 59, 0.12), transparent 70%);
+    pointer-events: none;
+}
+
+.rewards-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    gap: 10px;
+    position: relative;
+}
+
+.rewards-level {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.rewards-badge {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(179, 36, 59, 0.35);
+    flex-shrink: 0;
+}
+
+body.dark .rewards-badge {
+    box-shadow: 0 4px 20px rgba(179, 36, 59, 0.5);
+}
+
+.rewards-badge svg { width: 28px; height: 28px; stroke-width: 1.8; }
+
+.rewards-level-info .lv-num {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 1px;
+}
+
+.rewards-level-info .lv-name {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.3px;
+}
+
+.multiplier-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--primary-light);
+    color: var(--accent);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    direction: ltr;
+    transition: all var(--transition);
+    border: 1px solid var(--border-strong);
+}
+
+body.dark .multiplier-chip {
+    background: rgba(139, 26, 43, 0.3);
+    color: #E8E3EC;
+    border-color: rgba(179, 36, 59, 0.4);
+    box-shadow: 0 0 12px rgba(179, 36, 59, 0.2);
+}
+
+.rewards-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.r-stat {
+    background: var(--bg-soft);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    text-align: center;
+    border: 1px solid var(--border);
+    transition: all var(--transition);
+}
+
+.r-stat .rs-label {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-weight: 600;
+}
+
+.r-stat .rs-label svg { color: var(--text-muted); }
+.r-stat.points .rs-label svg { color: var(--accent); }
+.r-stat.bonus .rs-label svg { color: var(--savings); }
+
+.r-stat .rs-val {
+    font-size: 1.25rem;
+    font-weight: 800;
+    direction: ltr;
+    color: var(--text);
+    letter-spacing: -0.3px;
+}
+
+.r-stat .rs-val .unit {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-right: 3px;
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    direction: ltr;
+    font-weight: 600;
+}
+
+.rewards-progress {
+    height: 10px;
+    background: var(--bg-soft);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+}
+
+.rewards-progress-fill {
+    height: 100%;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 0 10px rgba(179, 36, 59, 0.5);
+}
+
+.rewards-next {
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 14px;
+    font-weight: 500;
+}
+
+.rewards-btn {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-soft);
+    color: var(--text);
+    font-size: 0.82rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all var(--transition);
+}
+
+.rewards-btn:hover {
+    background: var(--primary-light);
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.rewards-btn:active { transform: scale(0.97); }
+.rewards-btn svg { color: var(--accent); }
+
+/* ================================================================
+   عناوين الأقسام
+   ================================================================ */
+.section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 26px 0 14px;
+}
+
+.section-head h3 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: -0.3px;
+}
+
+.section-head h3 svg { color: var(--accent); }
+
+.section-head .link {
+    font-size: 0.78rem;
+    color: var(--accent);
+    font-weight: 700;
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: inherit;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition);
+}
+
+.section-head .link:hover { background: var(--primary-light); }
+
+/* ================================================================
+   كروت الملخص
+   ================================================================ */
+.summary-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.sum-mini {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 16px 12px;
+    text-align: center;
+    box-shadow: var(--shadow-xs);
+    border: 1px solid var(--border);
+    transition: all var(--transition);
+}
+
+.sum-mini:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+
+.sum-mini.income { border-top: 3px solid var(--income); }
+.sum-mini.expense { border-top: 3px solid var(--expense); }
+.sum-mini.savings { border-top: 3px solid var(--savings); }
+
+.sum-mini .m-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-weight: 600;
+}
+
+.sum-mini.income .m-label svg { color: var(--income); }
+.sum-mini.expense .m-label svg { color: var(--expense); }
+.sum-mini.savings .m-label svg { color: var(--savings); }
+
+.sum-mini .m-value {
+    font-size: 1rem;
+    font-weight: 800;
+    direction: ltr;
+    color: var(--text);
+    letter-spacing: -0.3px;
+}
+
+.sum-mini .m-value .cur {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* ================================================================
+   البطاقات العامة
+   ================================================================ */
+.card {
+    background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    padding: 22px;
+    box-shadow: var(--shadow-xs);
+    margin-bottom: 18px;
+    border: 1px solid var(--border);
+    transition: all var(--transition);
+}
+
+.donut-wrap {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.donut {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    position: relative;
+    margin: 0 auto;
+    background: var(--bg-soft);
+    transition: background var(--transition);
+}
+
+.donut::after {
+    content: '';
+    position: absolute;
+    inset: 26%;
+    background: var(--bg-card);
+    border-radius: 50%;
+    transition: background var(--transition);
+}
+
+.donut-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    flex-direction: column;
+}
+
+.donut-center .dc-val {
+    font-size: 0.95rem;
+    font-weight: 800;
+    direction: ltr;
+    color: var(--text);
+    letter-spacing: -0.3px;
+}
+
+.donut-center .dc-lab {
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.cat-list {
+    flex: 1;
+    min-width: 160px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cat-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.82rem;
+}
+
+.cat-row .c-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.cat-row .c-name { flex: 1; color: var(--text); font-weight: 600; }
+.cat-row .c-pct { font-size: 0.7rem; color: var(--text-muted); direction: ltr; font-weight: 600; }
+.cat-row .c-amt { font-size: 0.78rem; font-weight: 800; color: var(--text); direction: ltr; min-width: 60px; text-align: left; letter-spacing: -0.2px; }
+
+/* ================================================================
+   العمليات
+   ================================================================ */
+.tx-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tx-item {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--shadow-xs);
+    border: 1px solid var(--border);
+    transition: all var(--transition);
+}
+
+.tx-item:hover { transform: translateX(-2px); box-shadow: var(--shadow-sm); }
+.tx-item:active { transform: scale(0.99); }
+
+.tx-ico {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.tx-mid { flex: 1; min-width: 0; }
+
+.tx-cat-name {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tx-note {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 1px;
+}
+
+.tx-meta {
+    font-size: 0.66rem;
+    color: var(--text-faint);
+    margin-top: 3px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 500;
+}
+
+.tx-meta svg { color: var(--text-faint); }
+
+.tx-amt {
+    font-weight: 800;
+    font-size: 0.9rem;
+    direction: ltr;
+    white-space: nowrap;
+    text-align: left;
+    letter-spacing: -0.3px;
+}
+
+.tx-amt.income { color: var(--income); }
+.tx-amt.expense { color: var(--expense); }
+.tx-amt.savings { color: var(--savings); }
+.tx-amt.transfer { color: var(--accent); }
+
+.tx-actions-row {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.mini-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mini-btn:hover { background: var(--bg-soft); color: var(--accent); }
+
+/* ================================================================
+   فارغ
+   ================================================================ */
+.empty {
+    text-align: center;
+    padding: 40px 16px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.empty .e-ico {
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    background: var(--bg-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+}
+
+/* ================================================================
+   الشيتات (Bottom Sheets)
+   ================================================================ */
+.sheet-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(6px);
+    z-index: 200;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.sheet-overlay.active { display: flex; }
+
+.sheet {
+    background: var(--bg-card);
+    width: 100%;
+    max-width: 600px;
+    max-height: 92vh;
+    overflow-y: auto;
+    border-radius: 28px 28px 0 0;
+    padding: 8px 20px 36px;
+    animation: sheetUp 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: background var(--transition);
+    border-top: 1px solid var(--border-strong);
+}
+
+body.dark .sheet {
+    background: linear-gradient(180deg, #1B1620, #14101A);
+    box-shadow: 0 -8px 32px rgba(179, 36, 59, 0.15);
+}
+
+@keyframes sheetUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+.sheet-handle {
+    width: 40px;
+    height: 4px;
+    background: var(--border-strong);
+    border-radius: 4px;
+    margin: 8px auto 18px;
+}
+
+.sheet-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.sheet-head h2 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.3px;
+}
+
+.close-x {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+}
+
+.close-x:hover { background: var(--expense-bg); color: var(--accent); border-color: var(--accent); }
+
+/* ================================================================
+   النماذج
+   ================================================================ */
+.field { margin-bottom: 16px; }
+
+.field label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 7px;
+}
+
+.field input,
+.field select,
+.field textarea {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-family: inherit;
+    font-weight: 500;
+    background: var(--bg-soft);
+    color: var(--text);
+    outline: none;
+    transition: all var(--transition);
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+    border-color: var(--accent);
+    background: var(--bg-card);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.field textarea { resize: vertical; min-height: 60px; }
+
+/* اختيار النوع */
+.type-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.type-btn {
+    padding: 12px 4px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-soft);
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: inherit;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all var(--transition);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.type-btn:hover { border-color: var(--border-strong); color: var(--text-secondary); }
+
+.type-btn.active[data-type="income"] { background: var(--income-bg); color: var(--income); border-color: var(--income); box-shadow: 0 0 12px rgba(63, 125, 94, 0.25); }
+.type-btn.active[data-type="expense"] { background: var(--expense-bg); color: var(--accent); border-color: var(--accent); box-shadow: 0 0 12px rgba(179, 36, 59, 0.25); }
+.type-btn.active[data-type="savings"] { background: var(--savings-bg); color: var(--savings); border-color: var(--savings); box-shadow: 0 0 12px rgba(122, 106, 156, 0.25); }
+.type-btn.active[data-type="transfer"] { background: var(--primary-light); color: var(--accent); border-color: var(--accent); box-shadow: 0 0 12px rgba(179, 36, 59, 0.25); }
+
+body.dark .type-btn.active[data-type="income"] { color: #7ac09a; }
+body.dark .type-btn.active[data-type="expense"] { color: #E8E3EC; }
+body.dark .type-btn.active[data-type="savings"] { color: #b8a8d8; }
+body.dark .type-btn.active[data-type="transfer"] { color: #E8E3EC; }
+
+/* اختيار المحفظة */
+.wallet-pick {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.wpick-item {
+    padding: 13px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-soft);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: inherit;
+    color: var(--text);
+    text-align: right;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all var(--transition);
+}
+
+.wpick-item svg { color: var(--text-muted); }
+
+.wpick-item:hover { border-color: var(--border-strong); }
+
+.wpick-item.active {
+    border-color: var(--accent);
+    background: var(--primary-light);
+    color: var(--accent);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.wpick-item.active svg { color: var(--accent); }
+
+/* شبكة التصنيفات */
+.cat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+    gap: 8px;
+}
+
+.cat-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 10px 4px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-soft);
+    cursor: pointer;
+    font-size: 0.68rem;
+    font-weight: 600;
+    font-family: inherit;
+    color: var(--text-muted);
+    transition: all var(--transition);
+}
+
+.cat-chip svg { color: var(--text-muted); transition: color var(--transition); }
+
+.cat-chip:hover { border-color: var(--border-strong); }
+
+.cat-chip.selected {
+    border-color: var(--accent);
+    background: var(--primary-light);
+    color: var(--accent);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.cat-chip.selected svg { color: var(--accent); }
+
+/* الأزرار */
+.btn {
+    border: none;
+    padding: 14px 20px;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn:active { transform: scale(0.97); }
+.btn svg { color: currentColor; }
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: var(--text-on-primary);
+    box-shadow: var(--shadow-glow);
+}
+
+.btn-primary:hover {
+    box-shadow: 0 6px 24px var(--primary-glow), 0 0 20px rgba(179, 36, 59, 0.25);
+    transform: translateY(-1px);
+}
+
+.btn-soft {
+    background: var(--bg-soft);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.btn-soft:hover { background: var(--bg-muted); }
+
+.btn-block { width: 100%; }
+
+/* صف إضافة تصنيف */
+.add-cat-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.add-cat-row input {
+    flex: 1;
+    padding: 11px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.82rem;
+    font-family: inherit;
+    font-weight: 500;
+    background: var(--bg-soft);
+    color: var(--text);
+    outline: none;
+    transition: all var(--transition);
+}
+
+.add-cat-row input:focus { border-color: var(--accent); background: var(--bg-card); }
+
+/* ================================================================
+   تفاصيل المحفظة
+   ================================================================ */
+.wallet-hero {
+    border-radius: var(--radius-xl);
+    padding: 26px 22px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    color: #fff;
+    box-shadow: var(--shadow-lg);
+}
+
+body.dark .wallet-hero {
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 24px rgba(179, 36, 59, 0.15);
+}
+
+.wallet-hero::after {
+    content: '';
+    position: absolute;
+    top: -40%;
+    left: -20%;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+}
+
+.wallet-hero .wh-icon {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-md);
+    background: rgba(255,255,255,0.22);
+    color: #fff;
+}
+
+.wallet-hero .wh-name { font-size: 0.9rem; opacity: 0.88; margin-bottom: 6px; font-weight: 600; }
+.wallet-hero .wh-bal { font-size: 2rem; font-weight: 900; direction: ltr; text-align: right; letter-spacing: -0.8px; }
+.wallet-hero .wh-bal .cur { font-size: 0.9rem; opacity: 0.82; margin-right: 5px; font-weight: 600; }
+
+/* ================================================================
+   الأهداف
+   ================================================================ */
+.goal-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    padding: 18px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow-xs);
+    border: 1px solid var(--border);
+    transition: all var(--transition);
+}
+
+.goal-card:hover { box-shadow: var(--shadow-sm); }
+
+.goal-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.goal-emoji {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-md);
+    background: var(--savings-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--savings);
+}
+
+.goal-name { font-weight: 800; font-size: 0.95rem; flex: 1; color: var(--text); letter-spacing: -0.3px; }
+
+.goal-nums {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    direction: ltr;
+    font-weight: 600;
+}
+
+.progress-outer {
+    height: 10px;
+    background: var(--bg-soft);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
+}
+
+.progress-inner {
+    height: 100%;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--savings), var(--accent));
+    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 0 8px rgba(122, 106, 156, 0.4);
+}
+
+.goal-btns { display: flex; gap: 8px; }
+
+/* ================================================================
+   الميزانية
+   ================================================================ */
+.budget-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 15px 16px;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow-xs);
+    border: 1px solid var(--border);
+    transition: all var(--transition);
+}
+
+.budget-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.budget-cat { font-weight: 800; font-size: 0.9rem; flex: 1; color: var(--text); }
+.budget-nums { font-size: 0.72rem; color: var(--text-muted); direction: ltr; font-weight: 600; }
+
+.budget-bar {
+    height: 9px;
+    background: var(--bg-soft);
+    border-radius: 5px;
+    overflow: hidden;
+    margin-top: 8px;
+    border: 1px solid var(--border);
+}
+
+.budget-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.6s;
+}
+
+.budget-fill.ok { background: var(--income); }
+.budget-fill.warn { background: var(--warning); }
+.budget-fill.over { background: var(--expense); box-shadow: 0 0 8px rgba(179, 36, 59, 0.4); }
+
+.budget-alert {
+    font-size: 0.7rem;
+    margin-top: 8px;
+    text-align: left;
+    direction: ltr;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 600;
+}
+
+.budget-alert svg { color: currentColor; }
+
+/* ================================================================
+   الفلاتر
+   ================================================================ */
+.filters {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.filter-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.filter-row input,
+.filter-row select {
+    flex: 1;
+    min-width: 100px;
+    padding: 11px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.8rem;
+    font-family: inherit;
+    font-weight: 500;
+    background: var(--bg-card);
+    color: var(--text);
+    outline: none;
+    transition: all var(--transition);
+}
+
+.filter-row input:focus,
+.filter-row select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+/* ================================================================
+   توست
+   ================================================================ */
+.toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--text);
+    color: var(--bg-card);
+    padding: 13px 24px;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 700;
+    opacity: 0;
+    pointer-events: none;
+    transition: all var(--transition);
+    z-index: 300;
+    white-space: nowrap;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+body.dark .toast {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(179, 36, 59, 0.4);
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* ================================================================
+   سجل المكافآت
+   ================================================================ */
+.reward-log-item {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--shadow-xs);
+    margin-bottom: 8px;
+    border: 1px solid var(--border);
+    transition: all var(--transition);
+}
+
+.rl-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #fff;
+    flex-shrink: 0;
+}
+
+body.dark .rl-icon {
+    box-shadow: 0 0 12px rgba(179, 36, 59, 0.3);
+}
+
+.rl-mid { flex: 1; min-width: 0; }
+.rl-title { font-size: 0.88rem; font-weight: 700; color: var(--text); }
+.rl-reason { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; font-weight: 500; }
+.rl-date { font-size: 0.66rem; color: var(--text-faint); margin-top: 3px; direction: ltr; text-align: right; }
+.rl-pts { font-weight: 800; font-size: 1rem; color: var(--accent); direction: ltr; letter-spacing: -0.3px; }
+.rl-pts.negative { color: var(--expense); }
+
+.badge-item {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--shadow-xs);
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
+    opacity: 0.5;
+    transition: all var(--transition);
+}
+
+.badge-item.unlocked { opacity: 1; border-color: var(--accent); }
+
+body.dark .badge-item.unlocked {
+    box-shadow: 0 0 16px rgba(179, 36, 59, 0.2);
+}
+
+.badge-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    background: var(--bg-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    transition: all var(--transition);
+}
+
+.badge-item.unlocked .badge-icon {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(179, 36, 59, 0.35);
+}
+
+.badge-info { flex: 1; }
+.badge-name { font-size: 0.9rem; font-weight: 800; color: var(--text); }
+.badge-req { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; font-weight: 500; }
+
+/* ================================================================
+   رسالة التهنئة
+   ================================================================ */
+.congrats-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    z-index: 400;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.congrats-overlay.active { display: flex; }
+
+.congrats-box {
+    background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    padding: 36px 28px;
+    text-align: center;
+    max-width: 360px;
+    width: 100%;
+    box-shadow: var(--shadow-lg);
+    animation: congratsPop 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    border: 1px solid var(--border-strong);
+}
+
+body.dark .congrats-box {
+    background: linear-gradient(180deg, #221b28, #1B1620);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(179, 36, 59, 0.25);
+}
+
+@keyframes congratsPop {
+    0% { opacity: 0; transform: scale(0.85); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+.congrats-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(179, 36, 59, 0.4), 0 0 30px rgba(179, 36, 59, 0.3);
+}
+
+.congrats-icon svg { width: 40px; height: 40px; }
+
+.congrats-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 10px;
+    letter-spacing: -0.4px;
+}
+
+.congrats-msg {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    margin-bottom: 24px;
+}
+
+.congrats-msg strong { color: var(--accent); font-weight: 800; }
+
+/* ================================================================
+   ألوان المحافظ - ثيم أحمر شبحي
+   ================================================================ */
+.wc-sage { background: linear-gradient(135deg, #6E0F1F, #4a0a15); }
+.wc-blue { background: linear-gradient(135deg, #3A2A4A, #281d33); }
+.wc-lavender { background: linear-gradient(135deg, #5a4a6e, #3d3249); }
+.wc-peach { background: linear-gradient(135deg, #8B1A2B, #5a0e1a); }
+.wc-cream { background: linear-gradient(135deg, #4a3a2a, #2e231a); }
+.wc-rose { background: linear-gradient(135deg, #B3243B, #6E0F1F); }
+
+/* ================================================================
+   الاستجابة للشاشات
+   ================================================================ */
+@media (min-width: 900px) {
+    .menu-btn { display: none; }
+
+    .drawer {
+        transform: translateX(0) !important;
+        box-shadow: none;
+        border-left: 1px solid var(--border);
+    }
+
+    .drawer-overlay { display: none !important; }
+
+    .drawer-close { display: none; }
+
+    .main-wrap {
+        margin-right: var(--drawer-width);
+        margin-left: auto;
+        max-width: calc(720px + var(--drawer-width));
+        padding-right: 40px;
+        padding-left: 40px;
+    }
+
+    .top-bar {
+        margin-right: var(--drawer-width);
+        padding-right: 40px;
+        padding-left: 40px;
+    }
+
+    .welcome-greeting { font-size: 2.2rem; }
+    .total-amount { font-size: 2.8rem; }
+
+    .wallets-scroll { padding-bottom: 28px; }
+
+    .quick-actions { max-width: 500px; margin-left: auto; margin-right: auto; }
+}
+
+@media (min-width: 1200px) {
+    :root { --drawer-width: 300px; }
+}
+
+@media (max-width: 899px) {
+    .drawer { display: flex; }
+}
+
+@media (max-width: 400px) {
+    .summary-row { gap: 8px; }
+    .sum-mini { padding: 12px 8px; }
+    .sum-mini .m-value { font-size: 0.9rem; }
+    .welcome-greeting { font-size: 1.5rem; }
+    .total-amount { font-size: 2rem; }
+    .quick-action-btn { font-size: 0.7rem; padding: 12px 6px; }
+    .quick-action-btn .qa-ico { width: 34px; height: 34px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== القائمة الجانبية ===== -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<aside class="drawer" id="drawer">
+    <div class="drawer-header">
+        <div class="drawer-greeting">
+            <div class="dg-title">أهلاً بك</div>
+            <div class="dg-name"><span>salam</span></div>
+        </div>
+        <button class="drawer-close" onclick="closeDrawer()" aria-label="إغلاق">
+            <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+    </div>
+
+    <nav class="drawer-nav">
+        <button class="drawer-nav-item active" data-view="home" onclick="switchView('home')">
+            <svg class="ico" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+            <span>الرئيسية</span>
+        </button>
+        <button class="drawer-nav-item" data-view="wallets" onclick="switchView('wallets')">
+            <svg class="ico" viewBox="0 0 24 24"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+            <span>المحافظ</span>
+        </button>
+        <button class="drawer-nav-item" data-view="goals" onclick="switchView('goals')">
+            <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            <span>الأهداف</span>
+        </button>
+        <button class="drawer-nav-item" data-view="history" onclick="switchView('history')">
+            <svg class="ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+            <span>المصروفات والدخل</span>
+        </button>
+        <button class="drawer-nav-item" data-view="rewards" onclick="switchView('rewards')">
+            <svg class="ico" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            <span>مكافآتي</span>
+        </button>
+        <button class="drawer-nav-item" data-view="settings" onclick="switchView('settings')">
+            <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span>الإعدادات</span>
+        </button>
+    </nav>
+
+    <div class="drawer-footer">محفظتي — إدارة أموالك بذكاء</div>
+</aside>
+
+<!-- ===== الهيدر ===== -->
+<div class="top-bar">
+    <div class="logo">
+        <svg class="ico ico-lg" viewBox="0 0 24 24"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+        محفظتي
+    </div>
+    <div class="top-actions">
+        <button class="circle-btn menu-btn" id="menuBtn" onclick="openDrawer()" aria-label="القائمة">
+            <svg class="ico" viewBox="0 0 24 24"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+        </button>
+        <button class="circle-btn" id="themeBtn" onclick="toggleTheme()" aria-label="تبديل الوضع">
+            <svg class="ico" viewBox="0 0 24 24" id="themeIcon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <button class="circle-btn" id="backupBtn" onclick="openSheet('sheet-backup')" aria-label="نسخة احتياطية">
+            <svg class="ico" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+        </button>
+    </div>
+</div>
+
+<!-- ===== المحتوى ===== -->
+<main class="main-wrap">
+
+    <!-- الرئيسية -->
+    <div id="view-home">
+        <div class="welcome-screen">
+            <div class="welcome-greeting">أهلاً بك <span class="name">salam</span></div>
+            <div class="welcome-sub" id="welcomeSub"></div>
+        </div>
+
+        <div class="total-section">
+            <div class="total-label">إجمالي أموالي</div>
+            <div class="total-amount" id="totalAmount">0 <span class="cur">ج.م</span></div>
+        </div>
+
+        <!-- أزرار الإضافة السريعة -->
+        <div class="quick-actions">
+            <button class="quick-action-btn income" onclick="openTxSheet(null, 'income')">
+                <div class="qa-ico">
+                    <svg class="ico" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+                </div>
+                <span>إضافة دخل</span>
+            </button>
+            <button class="quick-action-btn expense" onclick="openTxSheet(null, 'expense')">
+                <div class="qa-ico">
+                    <svg class="ico" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+                </div>
+                <span>إضافة مصروف</span>
+            </button>
+            <button class="quick-action-btn savings" onclick="openTxSheet(null, 'savings')">
+                <div class="qa-ico">
+                    <svg class="ico" viewBox="0 0 24 24"><path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2h0V5z"/><path d="M2 9v1c0 1.1.9 2 2 2h1"/><path d="M16 11h.01"/></svg>
+                </div>
+                <span>إيداع مدخرات</span>
+            </button>
+        </div>
+
+        <!-- المحافظ -->
+        <div class="wallets-scroll" id="walletsScroll"></div>
+
+        <!-- المكافآت -->
+        <div class="rewards-card">
+            <div class="rewards-top">
+                <div class="rewards-level">
+                    <div class="rewards-badge" id="rewardsBadge">
+                        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    </div>
+                    <div class="rewards-level-info">
+                        <div class="lv-num" id="lvNum">المستوى 1</div>
+                        <div class="lv-name" id="lvName">البداية</div>
+                    </div>
+                </div>
+                <div class="multiplier-chip">
+                    <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    <span id="multVal">×1.0</span>
+                </div>
+            </div>
+            <div class="rewards-stats">
+                <div class="r-stat points">
+                    <div class="rs-label">
+                        <svg class="ico ico-sm" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        النقاط
+                    </div>
+                    <div class="rs-val" id="pointsVal">0</div>
+                </div>
+                <div class="r-stat bonus">
+                    <div class="rs-label">
+                        <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                        البونص
+                    </div>
+                    <div class="rs-val" id="bonusVal">0 <span class="unit">ج.م</span></div>
+                </div>
+            </div>
+            <div class="progress-info" id="progressInfo">
+                <span id="progCurrent">0</span>
+                <span id="progTarget">0</span>
+            </div>
+            <div class="rewards-progress">
+                <div class="rewards-progress-fill" id="rewardsProgressFill" style="width:0%"></div>
+            </div>
+            <div class="rewards-next" id="rewardsNext">وفر المزيد لفتح المستوى التالي</div>
+            <button class="rewards-btn" onclick="openRewardsLog()">
+                <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                سجل المكافآت والشارات
+            </button>
+        </div>
+
+        <!-- ملخص الشهر -->
+        <div class="section-head">
+            <h3>
+                <svg class="ico" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+                ملخص هذا الشهر
+            </h3>
+        </div>
+        <div class="summary-row">
+            <div class="sum-mini income">
+                <div class="m-label">
+                    <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+                    الداخل
+                </div>
+                <div class="m-value" id="mIncome">0 <span class="cur">ج.م</span></div>
+            </div>
+            <div class="sum-mini expense">
+                <div class="m-label">
+                    <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+                    الخارج
+                </div>
+                <div class="m-value" id="mExpense">0 <span class="cur">ج.م</span></div>
+            </div>
+            <div class="sum-mini savings">
+                <div class="m-label">
+                    <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2h0V5z"/><path d="M2 9v1c0 1.1.9 2 2 2h1"/><path d="M16 11h.01"/></svg>
+                    التحويش
+                </div>
+                <div class="m-value" id="mSavings">0 <span class="cur">ج.م</span></div>
+            </div>
+        </div>
+
+        <!-- الرسم الدائري -->
+        <div class="section-head">
+            <h3>
+                <svg class="ico" viewBox="0 0 24 24"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+                الفلوس بتروح فين؟
+            </h3>
+        </div>
+        <div class="card">
+            <div class="donut-wrap">
+                <div class="donut" id="donut">
+                    <div class="donut-center">
+                        <div class="dc-val" id="donutVal">0</div>
+                        <div class="dc-lab">إجمالي</div>
+                    </div>
+                </div>
+                <div class="cat-list" id="catList"></div>
+            </div>
+        </div>
+
+        <!-- آخر العمليات -->
+        <div class="section-head">
+            <h3>
+                <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                آخر العمليات
+            </h3>
+            <button class="link" onclick="switchView('history')">عرض الكل</button>
+        </div>
+        <div class="tx-list" id="recentTx"></div>
+    </div>
+
+    <!-- المحافظ -->
+    <div id="view-wallets" style="display:none">
+        <div class="section-head">
+            <h3>
+                <svg class="ico" viewBox="0 0 24 24"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+                محافظي
+            </h3>
+            <button class="link" onclick="openNewWalletSheet()">إضافة</button>
+        </div>
+        <div class="wallets-scroll" id="walletsScrollPage" style="flex-wrap: wrap; overflow: visible;"></div>
+    </div>
+
+    <!-- السجل -->
+    <div id="view-history" style="display:none">
+        <div class="section-head">
+            <h3>
+                <svg class="ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+                المصروفات والدخل
+            </h3>
+        </div>
+        <div class="quick-actions" style="margin-bottom:16px">
+            <button class="quick-action-btn income" onclick="openTxSheet(null, 'income')">
+                <div class="qa-ico"><svg class="ico" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg></div>
+                <span>دخل</span>
+            </button>
+            <button class="quick-action-btn expense" onclick="openTxSheet(null, 'expense')">
+                <div class="qa-ico"><svg class="ico" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></div>
+                <span>مصروف</span>
+            </button>
+            <button class="quick-action-btn savings" onclick="openTxSheet(null, 'savings')">
+                <div class="qa-ico"><svg class="ico" viewBox="0 0 24 24"><path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2h0V5z"/><path d="M2 9v1c0 1.1.9 2 2 2h1"/><path d="M16 11h.01"/></svg></div>
+                <span>تحويش</span>
+            </button>
+        </div>
+        <div class="filters">
+            <div class="filter-row">
+                <input type="month" id="fMonth">
+                <select id="fType">
+                    <option value="all">كل الأنواع</option>
+                    <option value="income">دخل</option>
+                    <option value="expense">مصروف</option>
+                    <option value="savings">تحويش</option>
+                    <option value="transfer">تحويل</option>
+                </select>
+                <select id="fWallet">
+                    <option value="all">كل المحافظ</option>
+                </select>
+            </div>
+            <div class="filter-row">
+                <input type="text" id="fSearch" placeholder="ابحث في الملاحظات...">
+            </div>
+        </div>
+        <div class="tx-list" id="historyTx"></div>
+    </div>
+
+    <!-- الأهداف -->
+    <div id="view-goals" style="display:none">
+        <div class="section-head">
+            <h3>
+                <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                أهداف التحويش
+            </h3>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="openGoalSheet()" style="margin-bottom:16px">
+            <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+            هدف جديد
+        </button>
+        <div id="goalsList"></div>
+    </div>
+
+    <!-- المكافآت -->
+    <div id="view-rewards" style="display:none">
+        <div class="section-head">
+            <h3>
+                <svg class="ico" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                مكافآتي
+            </h3>
+        </div>
+        <div id="rewardsPageContent"></div>
+    </div>
+
+    <!-- الإعدادات -->
+    <div id="view-settings" style="display:none">
+        <div class="section-head">
+            <h3>
+                <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                الإعدادات
+            </h3>
+        </div>
+        <div class="card">
+            <div style="font-weight:800;font-size:1rem;margin-bottom:14px;color:var(--text)">الميزانية الشهرية</div>
+            <div id="budgetList"></div>
+            <button class="btn btn-soft btn-block" onclick="openBudgetSheet()" style="margin-top:12px">
+                <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                إضافة حد ميزانية
+            </button>
+        </div>
+        <div class="card">
+            <div style="font-weight:800;font-size:1rem;margin-bottom:14px;color:var(--text)">إعدادات المكافآت</div>
+            <div id="rewardSettingsContent"></div>
+        </div>
+        <div class="card">
+            <div style="font-weight:800;font-size:1rem;margin-bottom:14px;color:var(--text)">النسخ الاحتياطي</div>
+            <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:14px;line-height:1.7">
+                صدّر بياناتك كملف JSON لحفظها، أو استورد ملفاً سابقاً لاستعادة بياناتك.
+            </p>
+            <button class="btn btn-primary btn-block" onclick="exportData()" style="margin-bottom:8px">
+                <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+                تصدير JSON
+            </button>
+            <button class="btn btn-soft btn-block" onclick="document.getElementById('importInput').click()">
+                <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+                استيراد JSON
+            </button>
+            <input type="file" id="importInput" accept=".json" style="display:none" onchange="importData(event)">
+        </div>
+    </div>
+
+</main>
+
+<!-- توست -->
+<div class="toast" id="toast"></div>
+
+<!-- رسالة التهنئة -->
+<div class="congrats-overlay" id="congratsOverlay">
+    <div class="congrats-box">
+        <div class="congrats-icon">
+            <svg viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+        </div>
+        <div class="congrats-title" id="congratsTitle">تهانينا</div>
+        <div class="congrats-msg" id="congratsMsg"></div>
+        <button class="btn btn-primary btn-block" onclick="document.getElementById('congratsOverlay').classList.remove('active')">متابعة</button>
+    </div>
+</div>
+
+<!-- ============ شيت: إضافة عملية ============ -->
+<div class="sheet-overlay" id="sheet-tx">
+    <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-head">
+            <h2 id="txTitle">إضافة عملية</h2>
+            <button class="close-x" onclick="closeSheet('sheet-tx')">
+                <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+        <div class="field">
+            <label>النوع</label>
+            <div class="type-row" id="typeRow">
+                <button class="type-btn active" data-type="expense">
+                    <svg class="ico" viewBox="0 0 24 24"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+                    مصروف
+                </button>
+                <button class="type-btn" data-type="income">
+                    <svg class="ico" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+                    دخل
+                </button>
+                <button class="type-btn" data-type="savings">
+                    <svg class="ico" viewBox="0 0 24 24"><path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2h0V5z"/><path d="M2 9v1c0 1.1.9 2 2 2h1"/><path d="M16 11h.01"/></svg>
+                    تحويش
+                </button>
+                <button class="type-btn" data-type="transfer">
+                    <svg class="ico" viewBox="0 0 24 24"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                    تحويل
+                </button>
+            </div>
+        </div>
+        <div class="field">
+            <label>المبلغ (ج.م)</label>
+            <input type="number" id="txAmount" placeholder="0.00" min="0" step="0.01" inputmode="decimal">
+        </div>
+        <div class="field" id="walletField">
+            <label>المحفظة</label>
+            <div class="wallet-pick" id="walletPick"></div>
+        </div>
+        <div class="field" id="toWalletField" style="display:none">
+            <label>إلى محفظة</label>
+            <div class="wallet-pick" id="toWalletPick"></div>
+        </div>
+        <div class="field" id="catField">
+            <label>التصنيف</label>
+            <div class="cat-grid" id="catGrid"></div>
+            <div class="add-cat-row">
+                <input type="text" id="newCatName" placeholder="تصنيف جديد...">
+                <button class="btn btn-soft" onclick="addCategoryInline()" style="padding:11px 18px;font-size:0.78rem">إضافة</button>
+            </div>
+        </div>
+        <div class="field">
+            <label>التاريخ</label>
+            <input type="date" id="txDate">
+        </div>
+        <div class="field">
+            <label>ملاحظة (اختياري)</label>
+            <textarea id="txNote" placeholder="مثلاً: غداء مع الأصدقاء"></textarea>
+        </div>
+        <input type="hidden" id="txEditId">
+        <button class="btn btn-primary btn-block" onclick="saveTx()">
+            <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+            حفظ العملية
+        </button>
+    </div>
+</div>
+
+<!-- ============ شيت: تفاصيل المحفظة ============ -->
+<div class="sheet-overlay" id="sheet-wallet">
+    <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-head">
+            <h2>تفاصيل المحفظة</h2>
+            <button class="close-x" onclick="closeSheet('sheet-wallet')">
+                <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+        <div id="walletDetailContent"></div>
+    </div>
+</div>
+
+<!-- ============ شيت: محفظة جديدة ============ -->
+<div class="sheet-overlay" id="sheet-newWallet">
+    <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-head">
+            <h2 id="walletSheetTitle">محفظة جديدة</h2>
+            <button class="close-x" onclick="closeSheet('sheet-newWallet')">
+                <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+        <div class="field">
+            <label>اسم المحفظة</label>
+            <input type="text" id="wName" placeholder="مثلاً: حساب بنك">
+        </div>
+        <div class="field">
+            <label>الأيقونة</label>
+            <div class="cat-grid" id="wIconGrid"></div>
+        </div>
+        <div class="field">
+            <label>اللون</label>
+            <div class="cat-grid" id="wColors"></div>
+        </div>
+        <div class="field">
+            <label>الرصيد الابتدائي (اختياري)</label>
+            <input type="number" id="wInitial" placeholder="0.00" min="0" step="0.01" inputmode="decimal">
+        </div>
+        <input type="hidden" id="wEditId">
+        <button class="btn btn-primary btn-block" onclick="saveWallet()">
+            <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+            حفظ
+        </button>
+    </div>
+</div>
+
+<!-- ============ شيت: هدف ============ -->
+<div class="sheet-overlay" id="sheet-goal">
+    <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-head">
+            <h2 id="goalSheetTitle">هدف جديد</h2>
+            <button class="close-x" onclick="closeSheet('sheet-goal')">
+                <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+        <div class="field">
+            <label>اسم الهدف</label>
+            <input type="text" id="gName" placeholder="مثلاً: موبايل جديد">
+        </div>
+        <div class="field">
+            <label>الأيقونة</label>
+            <div class="cat-grid" id="gIconGrid"></div>
+        </div>
+        <div class="field">
+            <label>المبلغ المستهدف (ج.م)</label>
+            <input type="number" id="gTarget" placeholder="0.00" min="0" step="0.01" inputmode="decimal">
+        </div>
+        <input type="hidden" id="gEditId">
+        <button class="btn btn-primary btn-block" onclick="saveGoal()">
+            <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+            حفظ
+        </button>
+    </div>
+</div>
+
+<!-- ============ شيت: إيداع/سحب هدف ============ -->
+<div class="sheet-overlay" id="sheet-goalTx">
+    <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-head">
+            <h2 id="goalTxTitle">إيداع</h2>
+            <button class="close-x" onclick="closeSheet('sheet-goalTx')">
+                <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+        <div class="field">
+            <label>المبلغ (ج.م)</label>
+            <input type="number" id="goalTxAmount" placeholder="0.00" min="0" step="0.01" inputmode="decimal">
+        </div>
+        <input type="hidden" id="goalTxId">
+        <input type="hidden" id="goalTxMode">
+        <button class="btn btn-primary btn-block" onclick="saveGoalTx()">
+            <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+            تأكيد
+        </button>
+    </div>
+</div>
+
+<!-- ============ شيت: ميزانية ============ -->
+<div class="sheet-overlay" id="sheet-budget">
+    <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-head">
+            <h2>حد ميزانية جديد</h2>
+            <button class="close-x" onclick="closeSheet('sheet-budget')">
+                <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+        <div class="field">
+            <label>التصنيف</label>
+            <select id="bCat"></select>
+        </div>
+        <div class="field">
+            <label>الحد الشهري (ج.م)</label>
+            <input type="number" id="bLimit" placeholder="0.00" min="0" step="0.01" inputmode="decimal">
+        </div>
+        <button class="btn btn-primary btn-block" onclick="saveBudget()">
+            <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+            حفظ
+        </button>
+    </div>
+</div>
+
+<!-- ============ شيت: سجل مكافآت ============ -->
+<div class="sheet-overlay" id="sheet-rewardsLog">
+    <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-head">
+            <h2>سجل المكافآت والشارات</h2>
+            <button class="close-x" onclick="closeSheet('sheet-rewardsLog')">
+                <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+            <button class="btn btn-soft" style="flex:1;font-size:0.78rem" onclick="renderRewardsTab('bonuses')" id="tabBonusesBtn">البونصات</button>
+            <button class="btn btn-soft" style="flex:1;font-size:0.78rem" onclick="renderRewardsTab('badges')" id="tabBadgesBtn">الشارات</button>
+        </div>
+        <div id="rewardsLogContent"></div>
+    </div>
+</div>
+
+<!-- ============ شيت: نسخة احتياطية ============ -->
+<div class="sheet-overlay" id="sheet-backup">
+    <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-head">
+            <h2>نسخة احتياطية</h2>
+            <button class="close-x" onclick="closeSheet('sheet-backup')">
+                <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+        <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:14px;line-height:1.7">
+            صدّر بياناتك كملف JSON لحفظها، أو استورد ملفاً سابقاً لاستعادة بياناتك.
+        </p>
+        <button class="btn btn-primary btn-block" onclick="exportData()" style="margin-bottom:8px">
+            <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+            تصدير JSON
+        </button>
+        <button class="btn btn-soft btn-block" onclick="document.getElementById('importInput').click()">
+            <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+            استيراد JSON
+        </button>
+    </div>
+</div>
+
+<script>
+/* ================================================================
+   الأيقونات SVG
+   ================================================================ */
+const ICONS = {
+    food: '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>',
+    transport: '<path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/>',
+    bills: '<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/>',
+    shopping: '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>',
+    health: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+    fun: '<rect width="20" height="12" x="2" y="6" rx="2"/><path d="M6 12h4"/><path d="M8 10v4"/><path d="M15 13h.01"/><path d="M18 11h.01"/>',
+    edu: '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
+    other_exp: '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>',
+    salary: '<rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+    freelance: '<rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>',
+    gift: '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/>',
+    other_inc: '<line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+    savings: '<path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2h0V5z"/><path d="M2 9v1c0 1.1.9 2 2 2h1"/><path d="M16 11h.01"/>',
+    transfer: '<path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>',
+    wallet: '<path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>',
+    cash: '<rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>',
+    bank: '<path d="M3 21h18"/><path d="M3 10h18"/><path d="M12 3 3 10h18z"/><path d="M5 10v11"/><path d="M9 10v11"/><path d="M15 10v11"/><path d="M19 10v11"/>',
+    card: '<rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>',
+    phone: '<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/>',
+    piggy: '<path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2h0V5z"/><path d="M2 9v1c0 1.1.9 2 2 2h1"/><path d="M16 11h.01"/>',
+    target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+    home: '<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>',
+    briefcase: '<rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+    heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+    star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+    coffee: '<path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" x2="6" y1="2" y2="4"/><line x1="10" x2="10" y1="2" y2="4"/><line x1="14" x2="14" y1="2" y2="4"/>',
+    car: '<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>',
+    book: '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>',
+    music: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+    plane: '<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>',
+    umbrella: '<path d="M22 12a10.06 10.06 0 0 0-20 0Z"/><path d="M12 12v8a2 2 0 0 0 4 0"/><path d="M12 2v1"/>',
+    check: '<path d="M20 6 9 17l-5-5"/>',
+    plus: '<path d="M12 5v14"/><path d="M5 12h14"/>',
+    x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+    edit: '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
+    trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+    save: '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/>',
+    arrowUp: '<path d="M12 19V5"/><path d="m5 12 7-7 7 7"/>',
+    arrowDown: '<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>',
+    clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+    pieChart: '<path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/>',
+    barChart: '<path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+    calendar: '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>',
+    fileText: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+    list: '<line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/>',
+    settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+    moon: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+    alert: '<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>',
+    info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+    download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/>',
+    upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/>',
+    search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+    trophy: '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>',
+    shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+    award: '<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>',
+    crown: '<path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/>',
+    gem: '<path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/>',
+    flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+    zap: '<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>',
+    medal: '<path d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15"/><path d="M11 12 5.12 2.2"/><path d="m13 12 5.88-9.8"/><path d="M8 7h8"/><circle cx="12" cy="17" r="5"/><path d="M12 18v-2h-.5"/>'
+};
+
+function icon(name, cls) {
+    return `<svg class="ico ${cls || ''}" viewBox="0 0 24 24">${ICONS[name] || ICONS.info}</svg>`;
+}
+
+/* ================================================================
+   التصنيفات الافتراضية
+   ================================================================ */
+const DEF_EXPENSE = [
+    { id: 'food', name: 'أكل', icon: 'food', color: '#B3243B' },
+    { id: 'transport', name: 'مواصلات', icon: 'car', color: '#7A6A9C' },
+    { id: 'bills', name: 'فواتير', icon: 'bills', color: '#8B1A2B' },
+    { id: 'shopping', name: 'تسوق', icon: 'shopping', color: '#9c4a5e' },
+    { id: 'health', name: 'صحة', icon: 'heart', color: '#3F7D5E' },
+    { id: 'fun', name: 'ترفيه', icon: 'music', color: '#b5657a' },
+    { id: 'edu', name: 'تعليم', icon: 'book', color: '#6e5a8a' },
+    { id: 'other_exp', name: 'أخرى', icon: 'other_exp', color: '#8E8799' }
+];
+
+const DEF_INCOME = [
+    { id: 'salary', name: 'مرتب', icon: 'briefcase', color: '#3F7D5E' },
+    { id: 'freelance', name: 'شغل إضافي', icon: 'freelance', color: '#5a9c7a' },
+    { id: 'gift', name: 'هدية', icon: 'gift', color: '#B3243B' },
+    { id: 'other_inc', name: 'أخرى', icon: 'other_inc', color: '#8E8799' }
+];
+
+const WALLET_COLORS = [
+    { cls: 'wc-sage', name: 'قاتم' },
+    { cls: 'wc-blue', name: 'بنفسجي' },
+    { cls: 'wc-lavender', name: 'أرجواني' },
+    { cls: 'wc-peach', name: 'أحمر' },
+    { cls: 'wc-cream', name: 'بني' },
+    { cls: 'wc-rose', name: 'قرمزي' }
+];
+
+const PICKER_ICONS = ['wallet','cash','bank','card','phone','piggy','target','home','briefcase','heart','star','coffee','car','book','music','plane','umbrella','shopping','gift','bills'];
+
+/* ================================================================
+   نظام المكافآت
+   ================================================================ */
+const DEFAULT_REWARDS = {
+    levels: [
+        { level: 1, name: 'البداية', icon: 'star', minSavings: 500, rewardPoints: 50, rewardBonus: 5 },
+        { level: 2, name: 'المدخر', icon: 'shield', minSavings: 1500, rewardPoints: 150, rewardBonus: 15 },
+        { level: 3, name: 'الحريص', icon: 'award', minSavings: 3000, rewardPoints: 300, rewardBonus: 30 },
+        { level: 4, name: 'المثابر', icon: 'medal', minSavings: 6000, rewardPoints: 600, rewardBonus: 60 },
+        { level: 5, name: 'الخبير', icon: 'trophy', minSavings: 10000, rewardPoints: 1000, rewardBonus: 100 },
+        { level: 6, name: 'الأسطورة', icon: 'crown', minSavings: 20000, rewardPoints: 2000, rewardBonus: 200 },
+        { level: 7, name: 'الجوهرة', icon: 'gem', minSavings: 50000, rewardPoints: 5000, rewardBonus: 500 }
+    ],
+    pointsPerAmount: 0.1,
+    multiplierBase: 1.0,
+    streakMultipliers: [
+        { weeks: 4, multiplier: 1.2 },
+        { weeks: 8, multiplier: 1.5 },
+        { weeks: 12, multiplier: 2.0 }
+    ]
+};
+
+/* ================================================================
+   البيانات والتخزين
+   ================================================================ */
+const KEYS = {
+    wallets: 'mw_wallets',
+    transactions: 'mw_transactions',
+    categories: 'mw_categories',
+    goals: 'mw_goals',
+    budgets: 'mw_budgets',
+    theme: 'mw_theme',
+    rewards: 'mw_rewards',
+    rewardSettings: 'mw_rewardSettings',
+    rewardLog: 'mw_rewardLog',
+    unlockedLevels: 'mw_unlockedLevels'
+};
+
+let state = {
+    wallets: load(KEYS.wallets, [
+        { id: 'cash', name: 'كاش', icon: 'cash', colorCls: 'wc-sage', initial: 0 },
+        { id: 'bank', name: 'حساب بنك', icon: 'bank', colorCls: 'wc-blue', initial: 0 }
+    ]),
+    transactions: load(KEYS.transactions, []),
+    categories: load(KEYS.categories, { expense: DEF_EXPENSE, income: DEF_INCOME }),
+    goals: load(KEYS.goals, []),
+    budgets: load(KEYS.budgets, []),
+    rewards: load(KEYS.rewards, { points: 0, bonus: 0, totalSaved: 0, streakWeeks: 0, lastSavingWeek: null }),
+    rewardSettings: load(KEYS.rewardSettings, DEFAULT_REWARDS),
+    rewardLog: load(KEYS.rewardLog, []),
+    unlockedLevels: load(KEYS.unlockedLevels, [])
+};
+
+function load(key, def) {
+    try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; }
+    catch { return def; }
+}
+
+function persist() {
+    localStorage.setItem(KEYS.wallets, JSON.stringify(state.wallets));
+    localStorage.setItem(KEYS.transactions, JSON.stringify(state.transactions));
+    localStorage.setItem(KEYS.categories, JSON.stringify(state.categories));
+    localStorage.setItem(KEYS.goals, JSON.stringify(state.goals));
+    localStorage.setItem(KEYS.budgets, JSON.stringify(state.budgets));
+    localStorage.setItem(KEYS.rewards, JSON.stringify(state.rewards));
+    localStorage.setItem(KEYS.rewardSettings, JSON.stringify(state.rewardSettings));
+    localStorage.setItem(KEYS.rewardLog, JSON.stringify(state.rewardLog));
+    localStorage.setItem(KEYS.unlockedLevels, JSON.stringify(state.unlockedLevels));
+}
+
+/* ================================================================
+   دوال مساعدة
+   ================================================================ */
+function fmt(n) {
+    return Number(n || 0).toLocaleString('ar-EG', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+function todayStr() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function monthKey(s) { return (s || '').slice(0, 7); }
+
+function currentMonth() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+}
+
+function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function getWallet(id) {
+    return state.wallets.find(w => w.id === id) || { name: 'غير معروف', icon: 'wallet', colorCls: 'wc-blue', initial: 0 };
+}
+
+function getCategory(type, id) {
+    const cats = state.categories[type] || [];
+    return cats.find(c => c.id === id) || { name: 'أخرى', icon: 'other_exp', color: '#8E8799' };
+}
+
+function walletBalance(id) {
+    const w = getWallet(id);
+    let bal = Number(w.initial) || 0;
+    state.transactions.forEach(t => {
+        const amt = Number(t.amount) || 0;
+        if (t.type === 'income' && t.walletId === id) bal += amt;
+        if (t.type === 'expense' && t.walletId === id) bal -= amt;
+        if (t.type === 'savings' && t.walletId === id) bal += (t.subtype === 'withdraw' ? amt : -amt);
+        if (t.type === 'transfer') {
+            if (t.walletId === id) bal -= amt;
+            if (t.toWalletId === id) bal += amt;
+        }
+    });
+    return bal;
+}
+
+function totalMoney() {
+    return state.wallets.reduce((s, w) => s + walletBalance(w.id), 0);
+}
+
+function totalSavings() {
+    let total = 0;
+    state.transactions.forEach(t => {
+        if (t.type === 'savings' && t.subtype !== 'withdraw') total += Number(t.amount) || 0;
+        if (t.type === 'savings' && t.subtype === 'withdraw') total -= Number(t.amount) || 0;
+    });
+    return Math.max(0, total);
+}
+
+function totalSavingsInGoals() {
+    let total = 0;
+    state.goals.forEach(g => { total += goalSaved(g.id); });
+    return total;
+}
+
+function totalAllSavings() {
+    return totalSavings() + totalSavingsInGoals();
+}
+
+/* ================================================================
+   نظام المكافآت
+   ================================================================ */
+function getCurrentLevel() {
+    const savings = totalAllSavings();
+    const levels = state.rewardSettings.levels;
+    let current = null;
+    for (const lv of levels) {
+        if (savings >= lv.minSavings) current = lv;
+        else break;
+    }
+    return current || { level: 0, name: 'مبتدئ', icon: 'star', minSavings: 0, rewardPoints: 0, rewardBonus: 0 };
+}
+
+function getNextLevel() {
+    const savings = totalAllSavings();
+    const levels = state.rewardSettings.levels;
+    for (const lv of levels) {
+        if (savings < lv.minSavings) return lv;
+    }
+    return null;
+}
+
+function getMultiplier() {
+    const streak = state.rewards.streakWeeks || 0;
+    const mults = state.rewardSettings.streakMultipliers;
+    let mult = state.rewardSettings.multiplierBase || 1.0;
+    for (const m of mults) {
+        if (streak >= m.weeks) mult = m.multiplier;
+    }
+    return mult;
+}
+
+function updateStreak() {
+    const now = new Date();
+    const day = now.getDay();
+    const daysSinceSat = (day + 1) % 7;
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - daysSinceSat);
+    weekStart.setHours(0,0,0,0);
+    const weekKey = weekStart.getFullYear() + '-' + String(weekStart.getMonth()+1).padStart(2,'0') + '-' + String(weekStart.getDate()).padStart(2,'0');
+
+    const last = state.rewards.lastSavingWeek;
+    if (last === weekKey) return;
+
+    if (!last) {
+        state.rewards.streakWeeks = 1;
+    } else {
+        const lastDate = new Date(last);
+        const diffDays = Math.floor((weekStart - lastDate) / (1000 * 60 * 60 * 24));
+        if (diffDays <= 7 && diffDays > 0) {
+            state.rewards.streakWeeks = (state.rewards.streakWeeks || 0) + 1;
+        } else {
+            state.rewards.streakWeeks = 1;
+        }
+    }
+    state.rewards.lastSavingWeek = weekKey;
+}
+
+function awardPointsForSaving(amount, reason) {
+    updateStreak();
+    const mult = getMultiplier();
+    const basePoints = amount * (state.rewardSettings.pointsPerAmount || 0.1);
+    const earnedPoints = Math.round(basePoints * mult);
+    const earnedBonus = Math.round(amount * 0.01 * mult);
+
+    if (earnedPoints <= 0 && earnedBonus <= 0) return;
+
+    state.rewards.points = (state.rewards.points || 0) + earnedPoints;
+    state.rewards.bonus = (state.rewards.bonus || 0) + earnedBonus;
+    state.rewards.totalSaved = (state.rewards.totalSaved || 0) + amount;
+
+    state.rewardLog.unshift({
+        id: uid(),
+        type: 'earn',
+        points: earnedPoints,
+        bonus: earnedBonus,
+        reason: reason || 'إيداع في التحويش',
+        multiplier: mult,
+        date: todayStr(),
+        timestamp: Date.now()
+    });
+
+    checkLevelUp();
+}
+
+function deductPointsForWithdraw(amount, reason) {
+    const mult = getMultiplier();
+    const pointsToDeduct = Math.round(amount * (state.rewardSettings.pointsPerAmount || 0.1) * mult);
+    const bonusToDeduct = Math.round(amount * 0.01 * mult);
+
+    if (pointsToDeduct <= 0 && bonusToDeduct <= 0) return;
+
+    state.rewards.points = Math.max(0, (state.rewards.points || 0) - pointsToDeduct);
+    state.rewards.bonus = Math.max(0, (state.rewards.bonus || 0) - bonusToDeduct);
+    state.rewards.totalSaved = Math.max(0, (state.rewards.totalSaved || 0) - amount);
+
+    state.rewardLog.unshift({
+        id: uid(),
+        type: 'deduct',
+        points: -pointsToDeduct,
+        bonus: -bonusToDeduct,
+        reason: reason || 'سحب من التحويش',
+        multiplier: mult,
+        date: todayStr(),
+        timestamp: Date.now()
+    });
+}
+
+function checkLevelUp() {
+    const savings = totalAllSavings();
+    const levels = state.rewardSettings.levels;
+    const newlyUnlocked = [];
+
+    for (const lv of levels) {
+        if (savings >= lv.minSavings && !state.unlockedLevels.includes(lv.level)) {
+            state.unlockedLevels.push(lv.level);
+            state.rewards.points = (state.rewards.points || 0) + lv.rewardPoints;
+            state.rewards.bonus = (state.rewards.bonus || 0) + lv.rewardBonus;
+
+            state.rewardLog.unshift({
+                id: uid(),
+                type: 'level',
+                points: lv.rewardPoints,
+                bonus: lv.rewardBonus,
+                reason: `فتح المستوى ${lv.level}: ${lv.name}`,
+                multiplier: 1,
+                date: todayStr(),
+                timestamp: Date.now()
+            });
+
+            newlyUnlocked.push(lv);
+        }
+    }
+
+    if (newlyUnlocked.length > 0) {
+        persist();
+        showCongrats(newlyUnlocked[newlyUnlocked.length - 1]);
+    }
+}
+
+function showCongrats(level) {
+    document.getElementById('congratsTitle').textContent = `المستوى ${level.level}: ${level.name}`;
+    document.getElementById('congratsMsg').innerHTML = `
+        لقد وصلت إلى مستوى جديد في الادخار.<br>
+        مكافأتك: <strong>${fmt(level.rewardPoints)} نقطة</strong> و <strong>${fmt(level.rewardBonus)} ج.م بونص</strong>
+    `;
+    document.getElementById('congratsOverlay').classList.add('active');
+}
+
+function renderRewardsCard() {
+    const current = getCurrentLevel();
+    const next = getNextLevel();
+    const savings = totalAllSavings();
+    const mult = getMultiplier();
+
+    document.getElementById('lvNum').textContent = current.level > 0 ? `المستوى ${current.level}` : 'المستوى 0';
+    document.getElementById('lvName').textContent = current.name;
+    document.getElementById('pointsVal').textContent = fmt(state.rewards.points || 0);
+    document.getElementById('bonusVal').innerHTML = `${fmt(state.rewards.bonus || 0)} <span class="unit">ج.م</span>`;
+    document.getElementById('multVal').textContent = `×${mult.toFixed(1)}`;
+
+    let progPct = 0, remaining = 0, target = 0;
+    if (next) {
+        const base = current.minSavings || 0;
+        target = next.minSavings;
+        remaining = Math.max(0, next.minSavings - savings);
+        const range = next.minSavings - base;
+        progPct = range > 0 ? Math.min(100, ((savings - base) / range) * 100) : 0;
+    } else {
+        progPct = 100;
+        remaining = 0;
+        target = savings;
+    }
+
+    document.getElementById('rewardsProgressFill').style.width = progPct + '%';
+    document.getElementById('progCurrent').textContent = fmt(savings) + ' ج.م';
+    document.getElementById('progTarget').textContent = next ? fmt(target) + ' ج.م' : 'الحد الأقصى';
+
+    if (next) {
+        document.getElementById('rewardsNext').textContent = `متبقي ${fmt(remaining)} ج.م لفتح المستوى ${next.level}: ${next.name}`;
+    } else {
+        document.getElementById('rewardsNext').textContent = 'لقد وصلت إلى أعلى مستوى. استمر في الادخار!';
+    }
+
+    const badgeEl = document.getElementById('rewardsBadge');
+    badgeEl.innerHTML = `<svg viewBox="0 0 24 24" style="width:28px;height:28px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round">${ICONS[current.icon] || ICONS.star}</svg>`;
+}
+
+/* ================================================================
+   سجل المكافآت
+   ================================================================ */
+function openRewardsLog() {
+    renderRewardsTab('bonuses');
+    openSheet('sheet-rewardsLog');
+}
+
+function renderRewardsTab(tab) {
+    document.querySelectorAll('#sheet-rewardsLog .btn').forEach(b => b.classList.remove('btn-primary'));
+    document.querySelectorAll('#sheet-rewardsLog .btn').forEach(b => b.classList.add('btn-soft'));
+    const activeBtn = document.getElementById(tab === 'bonuses' ? 'tabBonusesBtn' : 'tabBadgesBtn');
+    if (activeBtn) { activeBtn.classList.remove('btn-soft'); activeBtn.classList.add('btn-primary'); }
+
+    const content = document.getElementById('rewardsLogContent');
+
+    if (tab === 'bonuses') {
+        if (!state.rewardLog.length) {
+            content.innerHTML = `<div class="empty"><div class="e-ico">${icon('award', 'ico-lg')}</div>لا توجد مكافآت بعد. ابدأ بالتحويش!</div>`;
+            return;
+        }
+        content.innerHTML = state.rewardLog.slice(0, 50).map(log => {
+            const isNeg = log.type === 'deduct';
+            return `<div class="reward-log-item">
+                <div class="rl-icon">${icon(log.type === 'level' ? 'trophy' : isNeg ? 'arrowUp' : 'star', 'ico')}</div>
+                <div class="rl-mid">
+                    <div class="rl-title">${escapeHtml(log.reason)}</div>
+                    <div class="rl-reason">${log.multiplier > 1 ? `معامل ×${log.multiplier}` : 'بدون مضاعف'}</div>
+                    <div class="rl-date">${log.date}</div>
+                </div>
+                <div class="rl-pts ${isNeg ? 'negative' : ''}">${isNeg ? '' : '+'}${fmt(log.points)}</div>
+            </div>`;
+        }).join('');
+    } else {
+        const levels = state.rewardSettings.levels;
+        content.innerHTML = levels.map(lv => {
+            const unlocked = state.unlockedLevels.includes(lv.level);
+            return `<div class="badge-item ${unlocked ? 'unlocked' : ''}">
+                <div class="badge-icon">${icon(lv.icon, 'ico-lg')}</div>
+                <div class="badge-info">
+                    <div class="badge-name">${lv.level}. ${lv.name}</div>
+                    <div class="badge-req">يتطلب ${fmt(lv.minSavings)} ج.م مدخرات ${unlocked ? '— مفتوح' : ''}</div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+}
+
+/* ================================================================
+   صفحة المكافآت
+   ================================================================ */
+function renderRewardsPage() {
+    const el = document.getElementById('rewardsPageContent');
+    if (!el) return;
+
+    const current = getCurrentLevel();
+    const mult = getMultiplier();
+
+    let html = `<div class="card">
+        <div style="text-align:center;margin-bottom:16px">
+            <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;margin:0 auto 12px;color:#fff;box-shadow:0 6px 20px rgba(179,36,59,0.4)">
+                ${icon(current.icon, 'ico-xl')}
+            </div>
+            <div style="font-size:1.2rem;font-weight:800;color:var(--text);margin-bottom:4px">${current.name}</div>
+            <div style="font-size:0.78rem;color:var(--text-muted)">المستوى ${current.level} — معامل ×${mult.toFixed(1)}</div>
+        </div>
+        <div class="rewards-stats">
+            <div class="r-stat points">
+                <div class="rs-label">${icon('star', 'ico-sm')} النقاط</div>
+                <div class="rs-val">${fmt(state.rewards.points || 0)}</div>
+            </div>
+            <div class="r-stat bonus">
+                <div class="rs-label">${icon('trophy', 'ico-sm')} البونص</div>
+                <div class="rs-val">${fmt(state.rewards.bonus || 0)} <span class="unit">ج.م</span></div>
+            </div>
+        </div>
+    </div>`;
+
+    html += `<div class="section-head"><h3>${icon('award')} الشارات</h3></div>`;
+    html += state.rewardSettings.levels.map(lv => {
+        const unlocked = state.unlockedLevels.includes(lv.level);
+        return `<div class="badge-item ${unlocked ? 'unlocked' : ''}">
+            <div class="badge-icon">${icon(lv.icon, 'ico-lg')}</div>
+            <div class="badge-info">
+                <div class="badge-name">${lv.level}. ${lv.name}</div>
+                <div class="badge-req">يتطلب ${fmt(lv.minSavings)} ج.م ${unlocked ? '— مفتوح' : ''}</div>
+            </div>
+        </div>`;
+    }).join('');
+
+    html += `<div class="section-head"><h3>${icon('list')} سجل المكافآت</h3></div>`;
+    if (!state.rewardLog.length) {
+        html += `<div class="empty"><div class="e-ico">${icon('award', 'ico-lg')}</div>لا توجد مكافآت بعد</div>`;
+    } else {
+        html += state.rewardLog.slice(0, 20).map(log => {
+            const isNeg = log.type === 'deduct';
+            return `<div class="reward-log-item">
+                <div class="rl-icon">${icon(log.type === 'level' ? 'trophy' : isNeg ? 'arrowUp' : 'star', 'ico')}</div>
+                <div class="rl-mid">
+                    <div class="rl-title">${escapeHtml(log.reason)}</div>
+                    <div class="rl-date">${log.date}</div>
+                </div>
+                <div class="rl-pts ${isNeg ? 'negative' : ''}">${isNeg ? '' : '+'}${fmt(log.points)}</div>
+            </div>`;
+        }).join('');
+    }
+
+    el.innerHTML = html;
+}
+
+/* ================================================================
+   إعدادات المكافآت
+   ================================================================ */
+function renderRewardSettings() {
+    const el = document.getElementById('rewardSettingsContent');
+    if (!el) return;
+
+    let html = '';
+    state.rewardSettings.levels.forEach((lv, i) => {
+        html += `<div style="padding:12px;background:var(--bg-soft);border-radius:var(--radius-md);margin-bottom:10px;border:1px solid var(--border)">
+            <div style="font-weight:800;font-size:0.88rem;margin-bottom:10px;color:var(--text)">المستوى ${lv.level}: ${escapeHtml(lv.name)}</div>
+            <div class="field" style="margin-bottom:8px">
+                <label>الاسم</label>
+                <input type="text" value="${escapeHtml(lv.name)}" onchange="updateLevelSetting(${i},'name',this.value)">
+            </div>
+            <div class="field" style="margin-bottom:8px">
+                <label>حد الادخار (ج.م)</label>
+                <input type="number" value="${lv.minSavings}" min="0" onchange="updateLevelSetting(${i},'minSavings',this.value)">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div class="field" style="margin-bottom:0">
+                    <label>نقاط</label>
+                    <input type="number" value="${lv.rewardPoints}" min="0" onchange="updateLevelSetting(${i},'rewardPoints',this.value)">
+                </div>
+                <div class="field" style="margin-bottom:0">
+                    <label>بونص (ج.م)</label>
+                    <input type="number" value="${lv.rewardBonus}" min="0" onchange="updateLevelSetting(${i},'rewardBonus',this.value)">
+                </div>
+            </div>
+        </div>`;
+    });
+
+    html += `<div class="field">
+        <label>نقطة لكل جنيه مدخر</label>
+        <input type="number" value="${state.rewardSettings.pointsPerAmount}" min="0" step="0.01" onchange="updateGeneralSetting('pointsPerAmount',this.value)">
+    </div>`;
+
+    el.innerHTML = html;
+}
+
+function updateLevelSetting(idx, key, val) {
+    if (key === 'name') state.rewardSettings.levels[idx][key] = val;
+    else state.rewardSettings.levels[idx][key] = parseFloat(val) || 0;
+    persist();
+    renderRewardsCard();
+    renderRewardsPage();
+    renderRewardSettings();
+}
+
+function updateGeneralSetting(key, val) {
+    state.rewardSettings[key] = parseFloat(val) || 0;
+    persist();
+    renderRewardsCard();
+    renderRewardsPage();
+}
+
+/* ================================================================
+   التوست والشيتات
+   ================================================================ */
+function toast(msg) {
+    const el = document.getElementById('toast');
+    el.innerHTML = icon('check', 'ico-sm') + '<span>' + msg + '</span>';
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function openSheet(id) { document.getElementById(id).classList.add('active'); }
+function closeSheet(id) { document.getElementById(id).classList.remove('active'); }
+
+/* ================================================================
+   الدرج
+   ================================================================ */
+function openDrawer() {
+    document.getElementById('drawer').classList.add('active');
+    document.getElementById('drawerOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeDrawer() {
+    document.getElementById('drawer').classList.remove('active');
+    document.getElementById('drawerOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+/* ================================================================
+   الترحيب
+   ================================================================ */
+function renderWelcome() {
+    const now = new Date();
+    const hour = now.getHours();
+    let greeting = 'مساء الخير';
+    if (hour < 12) greeting = 'صباح الخير';
+    else if (hour < 17) greeting = 'نهارك سعيد';
+    const days = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    const months = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    const dateStr = `${days[now.getDay()]}، ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+    document.getElementById('welcomeSub').innerHTML = `
+        <span>${greeting}</span>
+        <span class="dot">•</span>
+        <span>${dateStr}</span>
+    `;
+}
+
+/* ================================================================
+   المحافظ
+   ================================================================ */
+function renderWallets() {
+    const cards = state.wallets.map(w => {
+        const bal = walletBalance(w.id);
+        return `<div class="wallet-card ${w.colorCls}" onclick="openWalletDetail('${w.id}')">
+            <div class="w-icon">${icon(w.icon, 'ico-lg')}</div>
+            <div class="w-name">${escapeHtml(w.name)}</div>
+            <div class="w-balance">${fmt(bal)}<span class="cur">ج.م</span></div>
+        </div>`;
+    }).join('');
+
+    const addCard = `
+        <div class="wallet-card add-wallet" onclick="openNewWalletSheet()">
+            <div class="plus-ico">${icon('plus', 'ico-lg')}</div>
+            <div class="label">إضافة محفظة</div>
+        </div>
+    `;
+
+    const scroll = document.getElementById('walletsScroll');
+    if (scroll) scroll.innerHTML = cards + addCard;
+
+    const scrollPage = document.getElementById('walletsScrollPage');
+    if (scrollPage) scrollPage.innerHTML = cards + addCard;
+
+    const totalEl = document.getElementById('totalAmount');
+    if (totalEl) totalEl.innerHTML = `${fmt(totalMoney())} <span class="cur">ج.م</span>`;
+}
+
+function openWalletDetail(id) {
+    const w = getWallet(id);
+    const bal = walletBalance(id);
+    const txs = state.transactions
+        .filter(t => t.walletId === id || t.toWalletId === id)
+        .sort((a,b) => (b.date||'').localeCompare(a.date||'') || (b.createdAt||0)-(a.createdAt||0));
+
+    let html = `<div class="wallet-hero ${w.colorCls}">
+        <div class="wh-icon">${icon(w.icon, 'ico-lg')}</div>
+        <div class="wh-name">${escapeHtml(w.name)}</div>
+        <div class="wh-bal">${fmt(bal)}<span class="cur">ج.م</span></div>
+    </div>`;
+
+    html += `<div style="display:flex;gap:8px;margin-bottom:16px">
+        <button class="btn btn-soft" style="flex:1;font-size:0.82rem" onclick="closeSheet('sheet-wallet');openNewWalletSheet('${id}')">
+            ${icon('edit', 'ico-sm')} تعديل
+        </button>
+        <button class="btn btn-soft" style="flex:1;font-size:0.82rem;color:var(--expense)" onclick="deleteWallet('${id}')">
+            ${icon('trash', 'ico-sm')} حذف
+        </button>
+    </div>`;
+
+    html += `<div style="font-size:0.9rem;font-weight:800;margin-bottom:12px;color:var(--text)">العمليات (${txs.length})</div>`;
+
+    if (!txs.length) {
+        html += `<div class="empty"><div class="e-ico">${icon('fileText', 'ico-lg')}</div>لا توجد عمليات</div>`;
+    } else {
+        html += `<div class="tx-list">${txs.map(t => renderTxItem(t, true)).join('')}</div>`;
+    }
+
+    document.getElementById('walletDetailContent').innerHTML = html;
+    openSheet('sheet-wallet');
+}
+
+/* ================================================================
+   عرض العمليات
+   ================================================================ */
+function renderTxItem(tx, showActions) {
+    let icoHtml, name, amtSign, amtClass, note;
+
+    if (tx.type === 'transfer') {
+        const fromW = getWallet(tx.walletId);
+        const toW = getWallet(tx.toWalletId);
+        icoHtml = `<div class="tx-ico" style="background:rgba(179,36,59,0.12);color:var(--accent)">${icon('transfer')}</div>`;
+        name = `${fromW.name} ← ${toW.name}`;
+        amtSign = '';
+        amtClass = 'transfer';
+        note = tx.note || 'تحويل بين المحافظ';
+    } else {
+        const cat = getCategory(tx.type, tx.categoryId);
+        icoHtml = `<div class="tx-ico" style="background:${cat.color}22;color:${cat.color}">${icon(cat.icon)}</div>`;
+        name = cat.name;
+        if (tx.type === 'income') { amtSign = '+'; amtClass = 'income'; }
+        else if (tx.type === 'expense') { amtSign = '-'; amtClass = 'expense'; }
+        else { amtSign = tx.subtype === 'withdraw' ? '+' : '-'; amtClass = 'savings'; }
+        note = tx.note || '';
+        if (tx.type === 'savings') name += tx.subtype === 'withdraw' ? ' (سحب)' : ' (إيداع)';
+    }
+
+    const w = getWallet(tx.walletId);
+    const meta = `${w.name} • ${tx.date || ''}`;
+
+    const actions = showActions ? `<div class="tx-actions-row">
+        <button class="mini-btn" onclick="editTx('${tx.id}')">${icon('edit', 'ico-sm')}</button>
+        <button class="mini-btn" onclick="deleteTx('${tx.id}')">${icon('trash', 'ico-sm')}</button>
+    </div>` : '';
+
+    return `<div class="tx-item">
+        ${icoHtml}
+        <div class="tx-mid">
+            <div class="tx-cat-name">${escapeHtml(name)}</div>
+            ${note ? `<div class="tx-note">${escapeHtml(note)}</div>` : ''}
+            <div class="tx-meta">${icon('clock', 'ico-sm')} ${meta}</div>
+        </div>
+        <div class="tx-amt ${amtClass}">${amtSign}${fmt(tx.amount)}</div>
+        ${actions}
+    </div>`;
+}
+
+function renderRecent() {
+    const recent = [...state.transactions]
+        .sort((a,b) => (b.date||'').localeCompare(a.date||'') || (b.createdAt||0)-(a.createdAt||0))
+        .slice(0, 5);
+    const el = document.getElementById('recentTx');
+    if (!el) return;
+    el.innerHTML = recent.length
+        ? recent.map(t => renderTxItem(t, false)).join('')
+        : `<div class="empty"><div class="e-ico">${icon('fileText', 'ico-lg')}</div>لا توجد عمليات بعد</div>`;
+}
+
+/* ================================================================
+   ملخص الشهر
+   ================================================================ */
+function renderMonthSummary() {
+    const cm = currentMonth();
+    let inc = 0, exp = 0, sav = 0;
+    state.transactions.forEach(t => {
+        if (monthKey(t.date) !== cm) return;
+        const amt = Number(t.amount) || 0;
+        if (t.type === 'income') inc += amt;
+        if (t.type === 'expense') exp += amt;
+        if (t.type === 'savings' && t.subtype !== 'withdraw') sav += amt;
+    });
+    const iEl = document.getElementById('mIncome');
+    const eEl = document.getElementById('mExpense');
+    const sEl = document.getElementById('mSavings');
+    if (iEl) iEl.innerHTML = `${fmt(inc)} <span class="cur">ج.م</span>`;
+    if (eEl) eEl.innerHTML = `${fmt(exp)} <span class="cur">ج.م</span>`;
+    if (sEl) sEl.innerHTML = `${fmt(sav)} <span class="cur">ج.م</span>`;
+}
+
+/* ================================================================
+   الرسم الدائري
+   ================================================================ */
+function renderDonut() {
+    const cm = currentMonth();
+    const map = {};
+    state.transactions.forEach(t => {
+        if (t.type !== 'expense' || monthKey(t.date) !== cm) return;
+        const cat = getCategory('expense', t.categoryId);
+        const k = t.categoryId || 'unknown';
+        if (!map[k]) map[k] = { name: cat.name, icon: cat.icon, color: cat.color, total: 0 };
+        map[k].total += Number(t.amount) || 0;
+    });
+    const items = Object.values(map).sort((a,b) => b.total - a.total);
+    const total = items.reduce((s,i) => s + i.total, 0);
+
+    const donut = document.getElementById('donut');
+    const catList = document.getElementById('catList');
+    if (!donut || !catList) return;
+
+    document.getElementById('donutVal').textContent = fmt(total);
+
+    if (!items.length) {
+        donut.style.background = 'var(--bg-soft)';
+        catList.innerHTML = '<div style="font-size:0.82rem;color:var(--text-muted);font-weight:500">لا توجد مصاريف هذا الشهر</div>';
+        return;
+    }
+
+    let acc = 0;
+    const stops = items.map(i => {
+        const start = acc / total * 360;
+        acc += i.total;
+        const end = acc / total * 360;
+        return `${i.color} ${start}deg ${end}deg`;
+    });
+    donut.style.background = `conic-gradient(${stops.join(', ')})`;
+
+    catList.innerHTML = items.slice(0, 6).map(i => {
+        const pct = total ? (i.total / total * 100).toFixed(0) : 0;
+        return `<div class="cat-row">
+            <span class="c-dot" style="background:${i.color}"></span>
+            <span class="c-name">${i.name}</span>
+            <span class="c-pct">${pct}%</span>
+            <span class="c-amt">${fmt(i.total)} ج.م</span>
+        </div>`;
+    }).join('');
+}
+
+/* ================================================================
+   السجل
+   ================================================================ */
+function renderHistory() {
+    const month = document.getElementById('fMonth').value;
+    const type = document.getElementById('fType').value;
+    const wallet = document.getElementById('fWallet').value;
+    const search = (document.getElementById('fSearch').value || '').toLowerCase();
+
+    let list = [...state.transactions];
+    if (month) list = list.filter(t => monthKey(t.date) === month);
+    if (type !== 'all') list = list.filter(t => t.type === type);
+    if (wallet !== 'all') list = list.filter(t => t.walletId === wallet || t.toWalletId === wallet);
+    if (search) list = list.filter(t => (t.note || '').toLowerCase().includes(search));
+
+    list.sort((a,b) => (b.date||'').localeCompare(a.date||'') || (b.createdAt||0)-(a.createdAt||0));
+
+    const el = document.getElementById('historyTx');
+    el.innerHTML = list.length
+        ? list.map(t => renderTxItem(t, true)).join('')
+        : `<div class="empty"><div class="e-ico">${icon('search', 'ico-lg')}</div>لا توجد نتائج</div>`;
+}
+
+function populateFilters() {
+    const sel = document.getElementById('fWallet');
+    if (!sel) return;
+    sel.innerHTML = '<option value="all">كل المحافظ</option>' +
+        state.wallets.map(w => `<option value="${w.id}">${escapeHtml(w.name)}</option>`).join('');
+}
+
+/* ================================================================
+   الأهداف
+   ================================================================ */
+function goalSaved(goalId) {
+    let saved = 0;
+    state.transactions.forEach(t => {
+        if (t.type === 'savings' && t.goalId === goalId) {
+            saved += (t.subtype === 'withdraw' ? -1 : 1) * (Number(t.amount) || 0);
+        }
+    });
+    return Math.max(0, saved);
+}
+
+function renderGoals() {
+    const el = document.getElementById('goalsList');
+    if (!el) return;
+    if (!state.goals.length) {
+        el.innerHTML = `<div class="empty"><div class="e-ico">${icon('target', 'ico-lg')}</div>لا توجد أهداف تحويش بعد</div>`;
+        return;
+    }
+    el.innerHTML = state.goals.map(g => {
+        const saved = goalSaved(g.id);
+        const target = Number(g.target) || 0;
+        const pct = target > 0 ? Math.min(100, (saved / target) * 100) : 0;
+        const remaining = Math.max(0, target - saved);
+        return `<div class="goal-card">
+            <div class="goal-top">
+                <div class="goal-emoji">${icon(g.icon || 'target')}</div>
+                <div class="goal-name">${escapeHtml(g.name)}</div>
+                <button class="mini-btn" onclick="openGoalSheet('${g.id}')">${icon('edit', 'ico-sm')}</button>
+                <button class="mini-btn" onclick="deleteGoal('${g.id}')">${icon('trash', 'ico-sm')}</button>
+            </div>
+            <div class="goal-nums">
+                <span>${fmt(saved)} / ${fmt(target)}</span>
+                <span>${pct.toFixed(0)}%</span>
+            </div>
+            <div class="progress-outer"><div class="progress-inner" style="width:${pct}%"></div></div>
+            <div style="font-size:0.74rem;color:var(--text-muted);text-align:center;margin-bottom:12px;font-weight:600">متبقي: ${fmt(remaining)} ج.م</div>
+            <div class="goal-btns">
+                <button class="btn btn-soft" style="flex:1;font-size:0.8rem" onclick="openGoalTx('${g.id}','deposit')">${icon('arrowDown', 'ico-sm')} إيداع</button>
+                <button class="btn btn-soft" style="flex:1;font-size:0.8rem" onclick="openGoalTx('${g.id}','withdraw')">${icon('arrowUp', 'ico-sm')} سحب</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+/* ================================================================
+   الميزانية
+   ================================================================ */
+function renderBudget() {
+    const el = document.getElementById('budgetList');
+    if (!el) return;
+    const cm = currentMonth();
+    if (!state.budgets.length) {
+        el.innerHTML = `<div class="empty"><div class="e-ico">${icon('calendar', 'ico-lg')}</div>لا توجد ميزانية محددة بعد</div>`;
+        return;
+    }
+    el.innerHTML = state.budgets.map((b, idx) => {
+        const cat = getCategory('expense', b.categoryId);
+        let spent = 0;
+        state.transactions.forEach(t => {
+            if (t.type === 'expense' && t.categoryId === b.categoryId && monthKey(t.date) === cm) {
+                spent += Number(t.amount) || 0;
+            }
+        });
+        const limit = Number(b.limit) || 0;
+        const pct = limit > 0 ? Math.min(100, (spent / limit) * 100) : 0;
+        let cls = 'ok', alert = '';
+        if (pct >= 100) { cls = 'over'; alert = `تجاوزت الحد بمبلغ ${fmt(spent - limit)} ج.م`; }
+        else if (pct >= 75) { cls = 'warn'; alert = `أنت قريب من الحد (${pct.toFixed(0)}%)`; }
+
+        return `<div class="budget-card">
+            <div class="budget-top">
+                <span style="color:${cat.color}">${icon(cat.icon)}</span>
+                <span class="budget-cat">${cat.name}</span>
+                <span class="budget-nums">${fmt(spent)} / ${fmt(limit)}</span>
+                <button class="mini-btn" onclick="deleteBudget(${idx})">${icon('trash', 'ico-sm')}</button>
+            </div>
+            <div class="budget-bar"><div class="budget-fill ${cls}" style="width:${pct}%"></div></div>
+            ${alert ? `<div class="budget-alert" style="color:${pct >= 100 ? 'var(--expense)' : 'var(--warning)'}">${icon('alert', 'ico-sm')} ${alert}</div>` : ''}
+        </div>`;
+    }).join('');
+}
+
+/* ================================================================
+   نافذة إضافة/تعديل العملية
+   ================================================================ */
+let txType = 'expense';
+let txWalletId = '';
+let txToWalletId = '';
+let txCatId = '';
+
+function openTxSheet(editId, presetType) {
+    const titleEl = document.getElementById('txTitle');
+    document.getElementById('txDate').value = todayStr();
+
+    if (editId) {
+        const tx = state.transactions.find(t => t.id === editId);
+        if (!tx) return;
+        titleEl.textContent = 'تعديل العملية';
+        document.getElementById('txEditId').value = tx.id;
+        document.getElementById('txAmount').value = tx.amount;
+        document.getElementById('txDate').value = tx.date || todayStr();
+        document.getElementById('txNote').value = tx.note || '';
+        txType = tx.type;
+        txWalletId = tx.walletId || (state.wallets[0] && state.wallets[0].id);
+        txToWalletId = tx.toWalletId || '';
+        txCatId = tx.categoryId || '';
+        setTxType(tx.type);
+    } else {
+        titleEl.textContent = 'إضافة عملية';
+        document.getElementById('txEditId').value = '';
+        document.getElementById('txAmount').value = '';
+        document.getElementById('txNote').value = '';
+        txType = presetType || 'expense';
+        txWalletId = state.wallets[0] ? state.wallets[0].id : '';
+        txToWalletId = state.wallets[1] ? state.wallets[1].id : (state.wallets[0] ? state.wallets[0].id : '');
+        txCatId = '';
+        setTxType(txType);
+    }
+
+    renderWalletPicker();
+    renderCatGrid();
+    openSheet('sheet-tx');
+}
+
+function setTxType(type) {
+    txType = type;
+    document.querySelectorAll('#typeRow .type-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.type === type);
+    });
+    document.getElementById('catField').style.display = type === 'transfer' ? 'none' : '';
+    document.getElementById('toWalletField').style.display = type === 'transfer' ? '' : 'none';
+    document.getElementById('walletField').querySelector('label').textContent = type === 'transfer' ? 'من محفظة' : 'المحفظة';
+    renderWalletPicker();
+    renderCatGrid();
+}
+
+function renderWalletPicker() {
+    const pick1 = document.getElementById('walletPick');
+    pick1.innerHTML = state.wallets.map(w =>
+        `<button class="wpick-item ${w.id === txWalletId ? 'active' : ''}" onclick="setTxWallet('${w.id}')">
+            ${icon(w.icon, 'ico-sm')}<span>${escapeHtml(w.name)}</span>
+        </button>`
+    ).join('');
+
+    const pick2 = document.getElementById('toWalletPick');
+    pick2.innerHTML = state.wallets.map(w =>
+        `<button class="wpick-item ${w.id === txToWalletId ? 'active' : ''}" onclick="setTxToWallet('${w.id}')">
+            ${icon(w.icon, 'ico-sm')}<span>${escapeHtml(w.name)}</span>
+        </button>`
+    ).join('');
+}
+
+function setTxWallet(id) { txWalletId = id; renderWalletPicker(); }
+function setTxToWallet(id) { txToWalletId = id; renderWalletPicker(); }
+
+function renderCatGrid() {
+    const grid = document.getElementById('catGrid');
+    if (txType === 'transfer') { grid.innerHTML = ''; return; }
+    const cats = state.categories[txType] || [];
+    if (!cats.find(c => c.id === txCatId)) txCatId = cats[0] ? cats[0].id : '';
+    grid.innerHTML = cats.map(c =>
+        `<button class="cat-chip ${c.id === txCatId ? 'selected' : ''}" onclick="setTxCat('${c.id}')">
+            <span style="color:${c.color}">${icon(c.icon)}</span><span>${escapeHtml(c.name)}</span>
+        </button>`
+    ).join('');
+}
+
+function setTxCat(id) { txCatId = id; renderCatGrid(); }
+
+function addCategoryInline() {
+    const input = document.getElementById('newCatName');
+    const name = input.value.trim();
+    if (!name) { toast('أدخل اسم التصنيف'); return; }
+    const colors = ['#B3243B','#7A6A9C','#8B1A2B','#3F7D5E','#9c4a5e','#6e5a8a','#8E8799'];
+    const icons = ['food','car','bills','shopping','heart','music','book','other_exp','briefcase','gift'];
+    const newCat = {
+        id: uid(), name,
+        icon: icons[Math.floor(Math.random()*icons.length)],
+        color: colors[Math.floor(Math.random()*colors.length)]
+    };
+    if (!state.categories[txType]) state.categories[txType] = [];
+    state.categories[txType].push(newCat);
+    persist();
+    txCatId = newCat.id;
+    input.value = '';
+    renderCatGrid();
+    toast('تمت إضافة التصنيف');
+}
+
+function saveTx() {
+    const amount = parseFloat(document.getElementById('txAmount').value);
+    if (!amount || amount <= 0) { toast('أدخل مبلغاً صحيحاً'); return; }
+    if (!txWalletId) { toast('اختر محفظة'); return; }
+    if (txType === 'transfer' && !txToWalletId) { toast('اختر محفظة الوجهة'); return; }
+    if (txType === 'transfer' && txToWalletId === txWalletId) { toast('لا يمكن التحويل لنفس المحفظة'); return; }
+    if (txType !== 'transfer' && !txCatId) { toast('اختر تصنيفاً'); return; }
+
+    const date = document.getElementById('txDate').value || todayStr();
+    const note = document.getElementById('txNote').value.trim();
+    const editId = document.getElementById('txEditId').value;
+
+    if (editId) {
+        const tx = state.transactions.find(t => t.id === editId);
+        if (tx) {
+            const oldAmount = tx.amount, oldType = tx.type, oldSubtype = tx.subtype;
+            tx.amount = amount; tx.type = txType;
+            tx.walletId = txWalletId;
+            tx.toWalletId = txType === 'transfer' ? txToWalletId : undefined;
+            tx.categoryId = txType === 'transfer' ? undefined : txCatId;
+            tx.date = date; tx.note = note;
+
+            if (oldType === 'savings') {
+                if (oldSubtype === 'withdraw') deductPointsForWithdraw(-oldAmount, 'تعديل عملية');
+                else awardPointsForSaving(-oldAmount, 'تعديل عملية');
+            }
+            if (txType === 'savings') {
+                if (tx.subtype === 'withdraw') deductPointsForWithdraw(amount, 'تعديل عملية');
+                else awardPointsForSaving(amount, 'تعديل عملية');
+            }
+        }
+        toast('تم تعديل العملية');
+    } else {
+        state.transactions.push({
+            id: uid(), type: txType,
+            walletId: txWalletId,
+            toWalletId: txType === 'transfer' ? txToWalletId : undefined,
+            categoryId: txType === 'transfer' ? undefined : txCatId,
+            subtype: txType === 'savings' ? 'deposit' : undefined,
+            amount, date, note, createdAt: Date.now()
+        });
+
+        if (txType === 'savings') {
+            awardPointsForSaving(amount, 'إيداع في التحويش');
+        }
+
+        toast('تمت إضافة العملية');
+    }
+
+    persist();
+    closeSheet('sheet-tx');
+    renderAll();
+}
+
+function editTx(id) { openTxSheet(id); }
+
+function deleteTx(id) {
+    if (!confirm('هل أنت متأكد من حذف هذه العملية؟')) return;
+    const tx = state.transactions.find(t => t.id === id);
+    if (tx) {
+        if (tx.type === 'savings') {
+            if (tx.subtype === 'withdraw') deductPointsForWithdraw(-tx.amount, 'حذف عملية');
+            else deductPointsForWithdraw(tx.amount, 'حذف عملية');
+        }
+    }
+    state.transactions = state.transactions.filter(t => t.id !== id);
+    persist();
+    toast('تم الحذف');
+    closeSheet('sheet-wallet');
+    renderAll();
+}
+
+/* ================================================================
+   المحافظ
+   ================================================================ */
+let wColorCls = 'wc-sage';
+let wIcon = 'wallet';
+
+function renderIconPicker(containerId, selectedIcon) {
+    const grid = document.getElementById(containerId);
+    grid.innerHTML = PICKER_ICONS.map(ic =>
+        `<button class="cat-chip ${ic === selectedIcon ? 'selected' : ''}" onclick="selectIcon('${containerId}','${ic}')">
+            ${icon(ic)}<span>${ic}</span>
+        </button>`
+    ).join('');
+}
+
+function selectIcon(containerId, ic) {
+    if (containerId === 'wIconGrid') wIcon = ic;
+    if (containerId === 'gIconGrid') gIcon = ic;
+    const target = document.getElementById(containerId);
+    target.querySelectorAll('.cat-chip').forEach(b => {
+        b.classList.toggle('selected', b.getAttribute('onclick') === `selectIcon('${containerId}','${ic}')`);
+    });
+}
+
+function openNewWalletSheet(editId) {
+    const title = document.getElementById('walletSheetTitle');
+    const colorGrid = document.getElementById('wColors');
+
+    if (editId) {
+        const w = getWallet(editId);
+        title.textContent = 'تعديل المحفظة';
+        document.getElementById('wEditId').value = editId;
+        document.getElementById('wName').value = w.name;
+        document.getElementById('wInitial').value = w.initial || 0;
+        wColorCls = w.colorCls;
+        wIcon = w.icon || 'wallet';
+    } else {
+        title.textContent = 'محفظة جديدة';
+        document.getElementById('wEditId').value = '';
+        document.getElementById('wName').value = '';
+        document.getElementById('wInitial').value = '';
+        wColorCls = 'wc-sage';
+        wIcon = 'wallet';
+    }
+
+    renderIconPicker('wIconGrid', wIcon);
+
+    colorGrid.innerHTML = WALLET_COLORS.map(c =>
+        `<button class="cat-chip ${c.cls === wColorCls ? 'selected' : ''}" onclick="selectWalletColor('${c.cls}')">
+            <span style="width:22px;height:22px;border-radius:6px;background:${{'wc-sage':'#6E0F1F','wc-blue':'#3A2A4A','wc-lavender':'#5a4a6e','wc-peach':'#8B1A2B','wc-cream':'#4a3a2a','wc-rose':'#B3243B'}[c.cls]}"></span>
+            <span>${c.name}</span>
+        </button>`
+    ).join('');
+
+    openSheet('sheet-newWallet');
+}
+
+function selectWalletColor(cls) {
+    wColorCls = cls;
+    document.querySelectorAll('#wColors .cat-chip').forEach(b => {
+        b.classList.toggle('selected', b.getAttribute('onclick') === `selectWalletColor('${cls}')`);
+    });
+}
+
+function saveWallet() {
+    const name = document.getElementById('wName').value.trim();
+    const initial = parseFloat(document.getElementById('wInitial').value) || 0;
+    const editId = document.getElementById('wEditId').value;
+
+    if (!name) { toast('أدخل اسم المحفظة'); return; }
+
+    if (editId) {
+        const w = getWallet(editId);
+        w.name = name; w.icon = wIcon; w.initial = initial; w.colorCls = wColorCls;
+        toast('تم تعديل المحفظة');
+    } else {
+        state.wallets.push({ id: uid(), name, icon: wIcon, initial, colorCls: wColorCls });
+        toast('تمت إضافة المحفظة');
+    }
+
+    persist();
+    closeSheet('sheet-newWallet');
+    renderAll();
+    populateFilters();
+}
+
+function deleteWallet(id) {
+    if (state.wallets.length <= 1) { toast('يجب أن تبقى محفظة واحدة على الأقل'); return; }
+    if (!confirm('حذف المحفظة؟ (العمليات المرتبطة ستبقى بدون محفظة)')) return;
+    state.wallets = state.wallets.filter(w => w.id !== id);
+    persist();
+    closeSheet('sheet-wallet');
+    toast('تم حذف المحفظة');
+    renderAll();
+    populateFilters();
+}
+
+/* ================================================================
+   الأهداف
+   ================================================================ */
+let gIcon = 'target';
+
+function openGoalSheet(editId) {
+    const title = document.getElementById('goalSheetTitle');
+    if (editId) {
+        const g = state.goals.find(x => x.id === editId);
+        if (!g) return;
+        title.textContent = 'تعديل الهدف';
+        document.getElementById('gEditId').value = editId;
+        document.getElementById('gName').value = g.name;
+        document.getElementById('gTarget').value = g.target;
+        gIcon = g.icon || 'target';
+    } else {
+        title.textContent = 'هدف جديد';
+        document.getElementById('gEditId').value = '';
+        document.getElementById('gName').value = '';
+        document.getElementById('gTarget').value = '';
+        gIcon = 'target';
+    }
+    renderIconPicker('gIconGrid', gIcon);
+    openSheet('sheet-goal');
+}
+
+function saveGoal() {
+    const name = document.getElementById('gName').value.trim();
+    const target = parseFloat(document.getElementById('gTarget').value);
+    const editId = document.getElementById('gEditId').value;
+
+    if (!name) { toast('أدخل اسم الهدف'); return; }
+    if (!target || target <= 0) { toast('أدخل مبلغاً مستهدفاً'); return; }
+
+    if (editId) {
+        const g = state.goals.find(x => x.id === editId);
+        if (g) { g.name = name; g.icon = gIcon; g.target = target; }
+        toast('تم تعديل الهدف');
+    } else {
+        state.goals.push({ id: uid(), name, icon: gIcon, target });
+        toast('تمت إضافة الهدف');
+    }
+
+    persist();
+    closeSheet('sheet-goal');
+    renderGoals();
+}
+
+function deleteGoal(id) {
+    if (!confirm('حذف الهدف؟ (العمليات المرتبطة ستبقى في السجل)')) return;
+    state.goals = state.goals.filter(g => g.id !== id);
+    persist();
+    toast('تم حذف الهدف');
+    renderGoals();
+}
+
+function openGoalTx(goalId, mode) {
+    document.getElementById('goalTxId').value = goalId;
+    document.getElementById('goalTxMode').value = mode;
+    document.getElementById('goalTxAmount').value = '';
+    document.getElementById('goalTxTitle').textContent = mode === 'deposit' ? 'إيداع في الهدف' : 'سحب من الهدف';
+    openSheet('sheet-goalTx');
+}
+
+function saveGoalTx() {
+    const goalId = document.getElementById('goalTxId').value;
+    const mode = document.getElementById('goalTxMode').value;
+    const amount = parseFloat(document.getElementById('goalTxAmount').value);
+    if (!amount || amount <= 0) { toast('أدخل مبلغاً صحيحاً'); return; }
+
+    const goal = state.goals.find(g => g.id === goalId);
+    if (!goal) return;
+
+    if (mode === 'withdraw') {
+        const saved = goalSaved(goalId);
+        if (amount > saved) { toast('المبلغ أكبر من المتوفر'); return; }
+    }
+
+    const walletId = state.wallets[0] ? state.wallets[0].id : '';
+    if (!walletId) { toast('أضف محفظة أولاً'); return; }
+
+    state.transactions.push({
+        id: uid(), type: 'savings',
+        subtype: mode === 'withdraw' ? 'withdraw' : 'deposit',
+        walletId, goalId,
+        categoryId: 'savings_cat',
+        amount, date: todayStr(),
+        note: `${goal.name} - ${mode === 'deposit' ? 'إيداع' : 'سحب'}`,
+        createdAt: Date.now()
+    });
+
+    if (mode === 'deposit') {
+        awardPointsForSaving(amount, `إيداع في هدف: ${goal.name}`);
+    } else {
+        deductPointsForWithdraw(amount, `سحب من هدف: ${goal.name}`);
+    }
+
+    persist();
+    closeSheet('sheet-goalTx');
+    toast(mode === 'deposit' ? 'تم الإيداع' : 'تم السحب');
+    renderAll();
+}
+
+/* ================================================================
+   الميزانية
+   ================================================================ */
+function openBudgetSheet() {
+    const sel = document.getElementById('bCat');
+    const cats = state.categories.expense || [];
+    sel.innerHTML = cats.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+    document.getElementById('bLimit').value = '';
+    openSheet('sheet-budget');
+}
+
+function saveBudget() {
+    const categoryId = document.getElementById('bCat').value;
+    const limit = parseFloat(document.getElementById('bLimit').value);
+    if (!limit || limit <= 0) { toast('أدخل حداً صحيحاً'); return; }
+
+    const existing = state.budgets.findIndex(b => b.categoryId === categoryId);
+    if (existing >= 0) {
+        state.budgets[existing].limit = limit;
+        toast('تم تحديث الميزانية');
+    } else {
+        state.budgets.push({ categoryId, limit });
+        toast('تمت إضافة الميزانية');
+    }
+
+    persist();
+    closeSheet('sheet-budget');
+    renderBudget();
+}
+
+function deleteBudget(idx) {
+    if (!confirm('حذف حد الميزانية؟')) return;
+    state.budgets.splice(idx, 1);
+    persist();
+    renderBudget();
+}
+
+/* ================================================================
+   النسخ الاحتياطي
+   ================================================================ */
+function exportData() {
+    const data = {
+        wallets: state.wallets,
+        transactions: state.transactions,
+        categories: state.categories,
+        goals: state.goals,
+        budgets: state.budgets,
+        rewards: state.rewards,
+        rewardSettings: state.rewardSettings,
+        rewardLog: state.rewardLog,
+        unlockedLevels: state.unlockedLevels,
+        exportedAt: new Date().toISOString()
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `flousy-backup-${todayStr()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('تم التصدير');
+}
+
+function importData(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+        try {
+            const data = JSON.parse(ev.target.result);
+            if (!confirm('استبدال البيانات الحالية بالبيانات المستوردة؟')) return;
+            if (data.wallets) state.wallets = data.wallets;
+            if (data.transactions) state.transactions = data.transactions;
+            if (data.categories) state.categories = data.categories;
+            if (data.goals) state.goals = data.goals;
+            if (data.budgets) state.budgets = data.budgets;
+            if (data.rewards) state.rewards = data.rewards;
+            if (data.rewardSettings) state.rewardSettings = data.rewardSettings;
+            if (data.rewardLog) state.rewardLog = data.rewardLog;
+            if (data.unlockedLevels) state.unlockedLevels = data.unlockedLevels;
+            persist();
+            renderAll();
+            populateFilters();
+            closeSheet('sheet-backup');
+            toast('تم الاستيراد بنجاح');
+        } catch {
+            toast('الملف غير صالح');
+        }
+    };
+    reader.readAsText(file);
+}
+
+/* ================================================================
+   التبديل بين الصفحات
+   ================================================================ */
+function switchView(name) {
+    document.getElementById('view-home').style.display = name === 'home' ? '' : 'none';
+    document.getElementById('view-wallets').style.display = name === 'wallets' ? '' : 'none';
+    document.getElementById('view-history').style.display = name === 'history' ? '' : 'none';
+    document.getElementById('view-goals').style.display = name === 'goals' ? '' : 'none';
+    document.getElementById('view-rewards').style.display = name === 'rewards' ? '' : 'none';
+    document.getElementById('view-settings').style.display = name === 'settings' ? '' : 'none';
+
+    document.querySelectorAll('.drawer-nav-item').forEach(b => {
+        b.classList.toggle('active', b.dataset.view === name);
+    });
+
+    if (name === 'history') renderHistory();
+    if (name === 'goals') renderGoals();
+    if (name === 'rewards') renderRewardsPage();
+    if (name === 'settings') { renderBudget(); renderRewardSettings(); }
+
+    if (window.innerWidth < 900) closeDrawer();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ================================================================
+   الوضع الداكن
+   ================================================================ */
+function initTheme() {
+    const saved = localStorage.getItem(KEYS.theme);
+    let isDark = true; // الثيم الداكن هو الافتراضي
+    if (saved) {
+        isDark = saved === 'dark';
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+        isDark = false;
+    }
+    if (isDark) {
+        document.body.classList.add('dark');
+        document.getElementById('themeIcon').innerHTML = ICONS.sun;
+    } else {
+        document.getElementById('themeIcon').innerHTML = ICONS.moon;
+    }
+}
+
+function toggleTheme() {
+    document.body.classList.toggle('dark');
+    const isDark = document.body.classList.contains('dark');
+    localStorage.setItem(KEYS.theme, isDark ? 'dark' : 'light');
+    document.getElementById('themeIcon').innerHTML = isDark ? ICONS.sun : ICONS.moon;
+}
+
+/* ================================================================
+   التشغيل
+   ================================================================ */
+function renderAll() {
+    renderWallets();
+    renderRewardsCard();
+    renderMonthSummary();
+    renderDonut();
+    renderRecent();
+    if (document.getElementById('view-history').style.display !== 'none') renderHistory();
+    if (document.getElementById('view-goals').style.display !== 'none') renderGoals();
+    if (document.getElementById('view-rewards').style.display !== 'none') renderRewardsPage();
+    if (document.getElementById('view-settings').style.display !== 'none') { renderBudget(); renderRewardSettings(); }
+}
+
+function init() {
+    renderWelcome();
+    initTheme();
+
+    document.getElementById('fMonth').value = currentMonth();
+
+    document.querySelectorAll('#typeRow .type-btn').forEach(b => {
+        b.addEventListener('click', () => setTxType(b.dataset.type));
+    });
+
+    document.getElementById('fMonth').addEventListener('change', renderHistory);
+    document.getElementById('fType').addEventListener('change', renderHistory);
+    document.getElementById('fWallet').addEventListener('change', renderHistory);
+    document.getElementById('fSearch').addEventListener('input', renderHistory);
+
+    document.querySelectorAll('.sheet-overlay').forEach(ov => {
+        ov.addEventListener('click', e => {
+            if (e.target === ov) ov.classList.remove('active');
+        });
+    });
+
+    document.getElementById('newCatName').addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); addCategoryInline(); }
+    });
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            closeDrawer();
+            document.querySelectorAll('.sheet-overlay.active').forEach(o => o.classList.remove('active'));
+            document.getElementById('congratsOverlay').classList.remove('active');
+        }
+    });
+
+    populateFilters();
+    renderAll();
+}
+
+init();
+</script>
+</body>
+</html>
